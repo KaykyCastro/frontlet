@@ -1,0 +1,32 @@
+#container-item {
+    width: 90%;
+    height: auto;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+    background-color: blanchedalmond;
+}
+
+#lista-produtos {
+    display: flex;
+}
+
+#lista-produtos div {
+    display: flex;
+}
+
+#lista-produtos #dados-produto {
+    display: grid;
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 4px;
+    grid-template-columns: 3fr 3fr 3fr;
+    background-color: rgb(255, 255, 255);
+}
+
+#container-item #header {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 3fr 3fr 3fr;
+    border-bottom: 1px solid black;
+}

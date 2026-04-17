@@ -1,0 +1,192 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@media print {
+    @page {
+        margin: 0;
+        size: 80mm auto;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    #container-nota,
+    #container-nota * {
+        visibility: visible;
+    }
+
+    #container-nota {
+        position: absolute !important;
+        top: 10% !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+
+        display: block !important;
+        width: 80mm !important;
+        height: auto !important;
+
+        margin: 0 !important;
+        padding: 6mm 4mm !important;
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+    }
+}
+
+p,
+h2,
+h3,
+h4 {
+    margin: 0;
+}
+
+hr {
+    border: none;
+    border-top: 1px dashed #000;
+    height: 1px;
+}
+
+#bg-nota {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#container-fiscal {
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    width: 400px;
+    padding: 20px;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Courier Prime', monospace;
+    background-color: white;
+    color: black;
+}
+
+#container-nota {
+    padding: 20px;
+    overflow-y: auto;
+    width: 60%;
+    height: 400px;
+    background-color: rgb(251, 255, 233);
+}
+
+#nota-header {
+    width: 100%;
+    justify-content: left;
+}
+
+#btn-close {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    border: 2px solid;
+    border-color: #e69216;
+    background-color: white;
+}
+
+#btn-imprimir {
+    border-radius: 20px;
+    border: 2px solid #e69216;
+    width: 300px;
+    height: 40px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-top: 10px;
+    font-family: inherit;
+    color: black;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+#container-fiscal img {
+    width: 100px;
+    height: 40px;
+}
+
+#empresa-data-fiscal {
+    height: 200px;
+    align-items: center;
+    justify-content: center;
+}
+
+#empresa-data-fiscal p {
+    font-size: 10px;
+    width: 80%;
+}
+
+#cliente-data-fiscal {
+    display: flex;
+}
+
+#cliente-data-fiscal p {
+    font-size: 10px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+#cliente-data-fiscal .data {
+    font-weight: 600;
+    color: #000;
+}
+
+#cupom {
+    align-items: center;
+}
+
+#header-itens {
+    display: grid;
+    justify-content: space-between;
+    width: 100%;
+    font-weight: 600;
+    margin-top: 4px;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    border-bottom: 1px solid black;
+}
+
+#header-itens p {
+    font-size: 10px;
+}
+
+#body-itens {
+    display: grid;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    width: 250px;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    font-size: 10px;
+}
+
+#body-itens #name-item {
+    width: 70px;
+    max-width: 200px;
+    font-size: 10px;
+    text-align: left;
+    overflow-wrap: break-word;
+    font-weight: bold;
+}
+
+#data-finish {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: left;
+}

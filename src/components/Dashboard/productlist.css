@@ -1,0 +1,43 @@
+
+#container-product {
+    display: flex;
+    justify-content: start;
+    box-sizing: border-box;
+    gap: 10px;
+    padding: 4px;
+    width: 39vw;
+    height: 60px;
+    margin-bottom: 6px;
+    border: 1px solid #ffb13c;
+    border-radius: 8px;
+    background-color: rgb(255, 251, 239);
+}
+
+#data-product {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.information-text {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    width:auto;
+    color: #311f03;
+}
+
+.data {
+    color: #c27605;
+}
+
+#in-stock {
+    color: #05bb57;
+}
+
+#out-stock {
+    color: #ce401d;
+}

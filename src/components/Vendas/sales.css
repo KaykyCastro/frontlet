@@ -1,0 +1,225 @@
+#container-sales {
+    display: flex;
+}
+
+#add-btn {
+    width: 200px;
+    height: 60px;
+    border-radius: 10px;
+    border: 1px solid #0b9b4c;
+    background-color: #05bb57;
+    cursor: pointer;
+}
+
+#container-cart {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    background-color: white;
+    width: 600px;
+    height: 600px;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+#cart {
+    justify-content: start;
+    align-items: start;
+    padding: 10px;
+    width: 90%;
+    height: 300px;
+    border-radius: 20px;
+    background-color: #ffd492;
+}
+
+#cart #header{
+    align-items: center;
+    display: grid;
+    width: 100%;
+    height: 30px;
+    grid-template-columns: 3fr 2fr 2fr 2fr 1fr;
+    padding: 1px;
+    border-top-left-radius:8px;
+    border-top-right-radius: 8px; 
+    background-color: #ffffff;
+    font-weight: 600;
+    border: 1px solid #e69a2f;
+    color: #000;
+}
+
+#cart #footer {
+    width: 100%;
+    display: flex;
+    flex-direction:column;
+    justify-content: start; 
+    padding: 1px;
+    font-weight: 400;
+    border-top: 1px solid #e69a2f;
+    color: #000000;
+}
+
+#cart #footer .subtotal {
+    font-size: 12px;
+}
+
+#cart #footer #total {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#products-cart {
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x:hidden;
+    display: inline-block;
+    width: 100%;
+    height: 300px;
+    padding: 10px;
+    background-color: rgb(255, 255, 255);
+}
+
+#container-products-cart {
+  display: grid;
+  grid-template-columns: 3fr 2fr 2fr 2fr 1fr;
+  gap: 1px; 
+  padding: 2px 0;
+  width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  border: 1px solid #e69a2f;
+  background-color: white;
+  color: black;
+}
+
+#quantity-product-cart {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 0px;
+    gap: 5px;
+    color: #000;
+}
+
+#quantity-product-cart #minus-cart {
+    background-color: rgb(219, 219, 219);
+    border: none;
+    width: 20px;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px ;
+    cursor: pointer;
+    color: #000;
+}
+
+#quantity-product-cart #minus-cart:hover {
+    background-color: rgb(231, 101, 101);
+}
+
+#quantity-product-cart #minus-cart:active {
+    background-color: rgb(173, 48, 48);
+}
+
+#quantity-product-cart #plus-cart {
+    background-color: rgb(219, 219, 219);
+    border: none;
+    width: 20px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px ;
+    cursor: pointer;
+    color: #000;
+}
+
+#quantity-product-cart #plus-cart:hover {
+    background-color: rgb(132, 255, 132);
+}
+
+#quantity-product-cart #plus-cart:active {
+    background-color: rgb(37, 185, 37);
+}
+
+#data-sale{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 90%;
+    gap: 10px;
+}
+
+#data-sale #box-desconto {
+    color: black;
+    justify-content: center;
+}
+
+#data-sale #box-desconto button {
+    width: 60px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background-color: #e69a2f;
+    color: #000000;
+    cursor: pointer;
+}
+
+#data-sale #box-desconto button:active {
+    font-weight: 500;
+    background-color: #f09414;
+    border: 1px solid #a16714;
+}
+
+#data-sale #desconto {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    color: black;
+}
+
+#clientes-select {
+    color: black;
+}
+
+#sales-btn-area {
+    display: inline-block;
+    width: 100%;
+}
+
+#sales-btn-area button {
+    width: 45%;
+    height: 40px;
+    border-radius: 10px;
+    margin: 2px;
+    background-color: white;
+    border: 1px solid #f09414;
+    color: #000000;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.nota {
+  width: 80mm;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.linha {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .nota, .nota * {
+    visibility: visible;
+  }
+
+  .nota {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}

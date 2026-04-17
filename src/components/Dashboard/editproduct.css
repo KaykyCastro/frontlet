@@ -1,0 +1,74 @@
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+#quantity-section {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+#quantity-section button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #b97103;
+  border-radius: 10px;
+  background-color: #e69216;
+}
+
+#bg-edit {
+  position: fixed;
+  inset: 0; 
+  background: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#container-edit {
+    position: fixed;
+    width: 260px;
+    height: 500px;
+    border-radius: 20px;
+    padding: 20px;
+    color: black;
+    font-size: 14px;
+    background-color: rgb(255, 255, 255);
+}
+
+
+
+input {
+    width: 240px;
+    height: 40px;
+    border: 1px solid #e69216;
+    border-radius: 6px;
+    color: black;
+    background-color: white;
+}
+
+#quantity-input {
+    width: 190px;
+    height: 40px;
+    border: 1px solid #e69216;
+    border-radius: 6px;
+    color: black;
+    background-color: white;
+}
+
+#close-btn-edit {
+  background-color: #ff7878;  
+  color: white;
+  border: none;
+  border-radius: 4px;
+  position: absolute;
+  left: 20em;
+}
