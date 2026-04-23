@@ -3,22 +3,11 @@ import { useNavigate } from "react-router-dom"
 import "./password.css"
 
 const STORED_HASH =
-"89f2ab9c6cede4bbee15778e1820a0a5404e67447094699c4380eabc82003e4f"
+"150209"
 
 type PopupProps = {
   onClose: () => void
   onSuccess?: () => void
-}
-
-async function hashPassword(password: string) {
-
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password)
-
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("")
 }
 
 export default function Password({ onClose, onSuccess }: PopupProps) {
@@ -29,9 +18,8 @@ export default function Password({ onClose, onSuccess }: PopupProps) {
 
   const handleLogin = async () => {
 
-    const inputHash = await hashPassword(password)
 
-    if (inputHash === STORED_HASH) {
+    if (password === STORED_HASH) {
 
       if (onSuccess) {
         onSuccess()

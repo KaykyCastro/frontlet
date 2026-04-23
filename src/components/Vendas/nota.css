@@ -79,7 +79,7 @@ hr {
     padding: 20px;
     overflow-y: auto;
     width: 60%;
-    height: 400px;
+    height: auto;
     background-color: rgb(251, 255, 233);
 }
 
