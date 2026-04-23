@@ -80,16 +80,15 @@ export default function Dashboard() {
     if (!confirm("Isso vai sobrescrever o banco de dados atual. Deseja continuar?")) return;
 
     const formData = new FormData();
-    // Altere de "file" para "backup"
     formData.append("backup", file); 
 
     try {
       const res = await fetch("http://localhost:3000/restore", {
         method: "POST",
-        body: formData, // O browser define o Content-Type automaticamente para multipart/form-data
+        body: formData, 
       });
 
-      const data = await res.json(); // Como o back retorna res.json, mude de .text() para .json()
+      const data = await res.json(); 
       alert(data.message || data.error);
     } catch (err) {
       console.error(err);
@@ -103,23 +102,9 @@ export default function Dashboard() {
         console.log(produto.id + "aa")
     }
 
-    /*const restaurarBackup = async (file : File) => {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const res = await fetch("http://localhost:3000/restore", {
-            method: "POST",
-            body: formData,
-        });
-
-        const text = await res.text();
-        alert(text);
-    };*/
-
     async function registrarProduto(e : React.MouseEvent) {
         e.preventDefault()
 
-        // ✅ Validação básica
         if (!nameRegister || !priceRegister || !quantityRegister || !codeRegister || !categoryRegister) {
             return alert("Preencha todos os campos!");
         }
@@ -151,7 +136,7 @@ export default function Dashboard() {
 
             const data = await res.json()
                 setNameRegister("")
-                setPriceRegister("")
+                setPriceRegister(0)
                 setQuantityRegister("")
                 setCodeRegister("")
                 setCategoryRegister("") 

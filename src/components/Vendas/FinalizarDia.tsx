@@ -46,10 +46,6 @@ export default function FinalizarDia() {
         setVendas(data)
     }
 
-
-
-    console.log(vendas)
-
     return (
         <div id="container-fin">
         <div id="container-div">

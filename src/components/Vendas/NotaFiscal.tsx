@@ -37,7 +37,6 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalFinal, des
     onClose()
   }
 
-  console.log(notaRef.current)
 
   return (
     <div id="bg-nota">

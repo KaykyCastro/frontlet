@@ -32,9 +32,6 @@ export default function EditProduct({
   const [showQuantity, setShowQuantity] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  console.log(id)
-
-  //Carregar categorias
   useEffect(() => {
     buscarCategorias()
   }, [])
@@ -45,7 +42,6 @@ export default function EditProduct({
     setCategory(data)
   }
 
-  //Preencher formulário quando abrir
   useEffect(() => {
     setProdutoId(id || 0)
     setNameEdit(nome || "")
@@ -54,8 +50,6 @@ export default function EditProduct({
     setQuantityEdit(estoque || 0)
     setCategoryEdit(categoriaId || 0)
   }, [nome, code, preco, estoque, categoriaId])
-
-  console.log(id + "teste")
 
   async function atualizarProduto() {
 
@@ -88,7 +82,7 @@ export default function EditProduct({
 
       console.log("Produto atualizado:", data)
 
-      if (onClick) onClick() // atualizar lista no componente pai
+      if (onClick) onClick()
       onClose()
     } catch (error) {
       console.error("Erro ao atualizar produto:", error)

@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import ProductList from "./ProductListSales"
 import NotaFiscal from "./NotaFiscal"
@@ -63,34 +63,25 @@ export default function Sales() {
         navigate("/Finalizar")
     }
 
-
-    console.log(metodoPagamento)
-
     const finalizarVenda = async (usarUsuario = false) => {
         try {
             if (cart.length === 0) return alert("Carrinho vazio!");
 
-            // Calcula subtotal do carrinho
             const subtotalCarrinho = cart.reduce(
                 (acc, item) => acc + item.preco * item.quantidade,
                 0
             );
 
-            // Monta itens aplicando desconto proporcional
             const itensComDesconto = cart.map((item) => {
                 let precoFinal = Number(item.preco);
 
                 if (desconto.tipo === "valor" && desconto.valor > 0) {
-                    // desconto em valor real proporcional ao item
                     const subtotalItem = precoFinal * item.quantidade;
                     const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor;
                     precoFinal = precoFinal - descontoProporcional / item.estoque;
                 } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
-                    // desconto percentual
                     precoFinal = precoFinal * (1 - desconto.valor / 100);
                 }
-
-                console.log(precoFinal)
 
                 return {
                     id: item.id,
@@ -105,8 +96,6 @@ export default function Sales() {
                 usuarioId: usarUsuario ? usuarioSelecionado?.id : null,
                 metodoPag: metodoPagamento,
             };
-
-            console.log(body)
 
 
 
@@ -123,7 +112,6 @@ export default function Sales() {
 
             await response.json();
 
-            //cliente, itens, totalItens, totalImpostos, totalFinal, numero, data
 
             const dataAtual = new Date().toLocaleDateString('pt-BR');
             const totalComDesconto = calculaTotal()
@@ -136,10 +124,9 @@ export default function Sales() {
             setData(String(dataAtual));
             setShowNote(true);
 
-            // ✅ Zera carrinho e desconto
             setCart([]);
             setDesconto({ tipo: "valor", valor: 0 });
-            setDescontoInput(""); // limpa input do desconto
+            setDescontoInput("");
             buscarProdutos();
             setMetodoPagamento("")
 
@@ -227,7 +214,6 @@ export default function Sales() {
                     return prev;
                 }
 
-                // 3. Atualizamos a quantidade (e não o estoque) no carrinho
                 return prev.map((p) =>
                     p.id === produto.id
                         ? { ...p, quantidade: p.quantidade + 1 }
@@ -235,7 +221,6 @@ export default function Sales() {
                 );
             }
 
-            // 4. Criando um novo CartItem
             const novoItem: CartItem = {
                 id: produto.id,
                 nome: produto.nome,
@@ -313,7 +298,7 @@ export default function Sales() {
         }
 
         setDesconto({ tipo, valor: numero });
-        setDescontoInput(""); // opcional: limpa o input após aplicar
+        setDescontoInput("");
     };
 
     const subtotal = cart.reduce((acc, item) => {
@@ -329,7 +314,7 @@ export default function Sales() {
             total -= (subtotal * desconto.valor) / 100;
         }
 
-        return Math.max(0, total); // nunca deixa negativo
+        return Math.max(0, total); 
     };
 
     return (
