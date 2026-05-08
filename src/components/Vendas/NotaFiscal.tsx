@@ -32,8 +32,6 @@ const resizeImage = async (
     img.onload = () => {
       const canvas = document.createElement("canvas");
 
-      const scale = width / img.width;
-
       canvas.width = width;
       canvas.height = 140;
 
