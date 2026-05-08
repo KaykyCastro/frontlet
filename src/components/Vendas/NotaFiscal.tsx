@@ -1,8 +1,10 @@
 import { useRef, useEffect, useState } from "react";
 import logo from "../../assets/logo.png"
 import { XIcon } from "@phosphor-icons/react";
-import "./nota.css"
 import { type Note } from "../../types";
+import qz from "qz-tray"
+import { initQZ } from "./services/qzServices";
+import "./nota.css"
 
 type FiscalProps = Note & {
   onClose?: () => void
@@ -16,6 +18,225 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalFinal, des
     toBase64(logo).then(setLogoBase64);
   }, []);
 
+  useEffect(()=> {
+      initQZ().catch(console.error)
+  }, [])
+
+const resizeImage = async (
+  base64: string,
+  width: number
+): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+
+      const scale = width / img.width;
+
+      canvas.width = width;
+      canvas.height = 140;
+
+      const ctx = canvas.getContext("2d");
+
+      ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      resolve(canvas.toDataURL("image/png"));
+    };
+
+    img.src = base64;
+  });
+};
+
+const imprimirCupom = async () => {
+  try {
+    await initQZ();
+
+    const config = qz.configs.create("i9");
+
+    // REDUZ A LOGO
+    const smallLogo = await resizeImage(logoBase64, 180);
+
+    const linha = "-".repeat(60);
+
+    // FUNÇÃO PARA QUEBRAR TEXTO
+    const quebrarTexto = (texto, tamanho) => {
+      const palavras = texto.split(" ");
+      const linhas = [];
+
+      let linhaAtual = "";
+
+      for (const palavra of palavras) {
+        if ((linhaAtual + palavra).length > tamanho) {
+          linhas.push(linhaAtual.trim());
+          linhaAtual = palavra + " ";
+        } else {
+          linhaAtual += palavra + " ";
+        }
+      }
+
+      if (linhaAtual) {
+        linhas.push(linhaAtual.trim());
+      }
+
+      return linhas;
+    };
+
+    // FORMATAR ITENS
+    const itensTexto = itens.map((item) => {
+      // TAMANHO MÁXIMO DO NOME
+      const linhasNome = quebrarTexto(item.nome, 28);
+
+      const qtd = `${item.quantidade}x`.padStart(6, " ");
+
+      const valor = item.preco
+        .toFixed(2)
+        .padStart(10, " ");
+
+      const total = (item.preco * item.quantidade)
+        .toFixed(2)
+        .padStart(10, " ");
+
+      let texto = "";
+
+      linhasNome.forEach((linhaNome, index) => {
+        // PRIMEIRA LINHA MOSTRA TUDO
+        if (index === 0) {
+          texto +=
+            linhaNome.padEnd(34, " ") +
+            qtd +
+            valor +
+            total +
+            "\n";
+        } else {
+          // RESTANTE MOSTRA SÓ O NOME
+          texto += linhaNome + "\n";
+        }
+      });
+
+      return texto;
+    });
+
+    const cupom = [
+      // RESET
+      "\x1B\x40",
+
+      // FONTE MENOR
+      "\x1BM\x01",
+
+      // TEXTO COMPACTO
+      "\x1B!\x01",
+
+      // CENTRALIZAR
+      "\x1B\x61\x31",
+
+      // LOGO
+      {
+        type: "raw",
+        format: "image",
+        data: smallLogo,
+        options: {
+          language: "ESCPOS",
+          dotDensity: "single",
+        },
+      },
+
+      "\n",
+
+      // EMPRESA
+      "\x1B\x45\x01",
+      "LET PRESENTES\n",
+      "\x1B\x45\x00",
+
+      "Av. Bulevar I, 291\n",
+      "Jangurussu - Fortaleza/CE\n",
+      "CEP: 60866-280\n",
+      "CNPJ: 32.750.913.0001-11\n",
+
+      "\n",
+
+      linha + "\n",
+
+      // CLIENTE
+      cliente
+        ? [
+            "\x1B\x61\x30",
+
+            "\x1B\x45\x01",
+            "CLIENTE\n",
+            "\x1B\x45\x00",
+
+            "\n",
+
+            `Nome: ${cliente.nome}\n`,
+            `CPF/CNPJ: ${cliente.cpf}\n`,
+            `Endereco: ${cliente.endereco}\n`,
+
+            "\n",
+
+            linha + "\n",
+          ]
+        : [],
+
+      // TITULO
+      "\x1B\x61\x31",
+
+      "\x1B\x45\x01",
+      "CUPOM FISCAL\n",
+      "\x1B\x45\x00",
+
+      "\n",
+
+      // ITENS
+      "\x1B\x61\x00",
+
+      "PRODUTO                                QTD    VALOR    TOTAL\n",
+
+      linha + "\n",
+
+      ...itensTexto,
+
+      linha + "\n",
+
+      "\n",
+
+      `Total itens: ${totalItens}\n`,
+      `Desconto: R$ ${desconto?.toFixed(2)}\n`,
+
+      "\n",
+
+      linha + "\n",
+
+      // TOTAL DESTACADO
+      "\x1B\x61\x31",
+
+      "\x1D\x21\x11",
+
+      `TOTAL: R$ ${totalFinal?.toFixed(2)}\n`,
+
+      "\x1D\x21\x00",
+
+      "\n",
+
+      `Data: ${data}\n`,
+
+      "\n\n",
+
+      "Obrigado pela preferencia!\n",
+
+      "\n\n\n\n",
+
+      // CORTE
+      "\x1D\x56\x41\x03",
+    ].flat();
+
+    await qz.print(config, cupom);
+
+    console.log("Impresso com sucesso");
+  } catch (err) {
+    console.error(err);
+  }
+};
   const notaRef = useRef<HTMLDivElement>(null);
 
   const toBase64 = async (url: string) => {
@@ -120,7 +341,7 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalFinal, des
 
         </div>
 
-        <button id="btn-imprimir" onClick={handlePrint}>
+        <button id="btn-imprimir" onClick={imprimirCupom}>
           Imprimir Nota Fiscal
         </button>
       </div>
