@@ -7,10 +7,11 @@ import { initQZ } from "./services/qzServices";
 import "./nota.css"
 
 type FiscalProps = Note & {
+  totalSemDesconto: number
   onClose?: () => void
 }
 
-export default function NotaFiscal({ cliente, itens, totalItens, totalFinal, desconto, data, onClose }: FiscalProps) {
+export default function NotaFiscal({ cliente, itens, totalItens, totalSemDesconto, totalFinal, desconto, data, onClose }: FiscalProps) {
 
   const [logoBase64, setLogoBase64] = useState("");
 
@@ -146,10 +147,14 @@ const imprimirCupom = async () => {
       "LET PRESENTES\n",
       "\x1B\x45\x00",
 
-      "Av. Bulevar I, 291\n",
+      "Av. Bulevar I, 291",
       "Jangurussu - Fortaleza/CE\n",
-      "CEP: 60866-280\n",
+      "CEP: 60866-280",
       "CNPJ: 32.750.913.0001-11\n",
+
+      "\n",
+
+      `Data: ${data}\n`,
 
       "\n",
 
@@ -180,7 +185,7 @@ const imprimirCupom = async () => {
       "\x1B\x61\x31",
 
       "\x1B\x45\x01",
-      "CUPOM FISCAL\n",
+      "RECIBO FISCAL\n",
       "\x1B\x45\x00",
 
       "\n",
@@ -199,7 +204,8 @@ const imprimirCupom = async () => {
       "\n",
 
       `Total itens: ${totalItens}\n`,
-      `Desconto: R$ ${desconto?.toFixed(2)}\n`,
+      `Valor Total: R$ ${totalSemDesconto.toFixed(2)}\n`,
+      `Desconto: R$ ${desconto?.toFixed(2)}\n`, 
 
       "\n",
 
@@ -210,17 +216,14 @@ const imprimirCupom = async () => {
 
       "\x1D\x21\x11",
 
-      `TOTAL: R$ ${totalFinal?.toFixed(2)}\n`,
+      `A PAGAR: R$ ${totalFinal?.toFixed(2)}\n`,
 
       "\x1D\x21\x00",
 
-      "\n",
-
-      `Data: ${data}\n`,
-
+      
       "\n\n",
 
-      "Obrigado pela preferencia!\n",
+      "Obrigado pela preferenciar e volte sempre!\n",
 
       "\n\n\n\n",
 

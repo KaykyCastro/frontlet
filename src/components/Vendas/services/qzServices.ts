@@ -6,7 +6,7 @@ export async function initQZ() {
   if (initialized) return;
 
   qz.security.setCertificatePromise(function(resolve, reject) {
-    fetch("/certificate.pem")
+    fetch("/digital-certificate.txt")
       .then(function(res) {
         if (!res.ok) {
           throw new Error("Certificado não encontrado");
@@ -15,6 +15,7 @@ export async function initQZ() {
         return res.text();
       })
       .then(function(cert) {
+        console.log(cert)
         resolve(cert);
       })
       .catch(function(err) {

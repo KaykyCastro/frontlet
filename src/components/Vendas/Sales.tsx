@@ -21,6 +21,7 @@ export default function Sales() {
     const [cliente, setCliente] = useState<User>()
     const [itens, setItens] = useState<CartItem[]>()
     const [totalItens, setTotalItens] = useState<number>()
+    const [totalSemDesconto, setTotalSemDesconto] = useState<number>(0)
     const [totalFinal, setTotalFinal] = useState<number>()
     const [descontoNota, setDescontoNota] = useState<number>()
     const [data, setData] = useState<string>()
@@ -72,6 +73,8 @@ export default function Sales() {
                 0
             );
 
+
+
             const itensComDesconto = cart.map((item) => {
                 let precoFinal = Number(item.preco);
 
@@ -119,6 +122,7 @@ export default function Sales() {
             setCliente(usuarioSelecionado);
             setItens(cart);
             setTotalItens(cart.length)
+            setTotalSemDesconto(subtotal)
             setTotalFinal(totalComDesconto);
             setDescontoNota(desconto.valor);
             setData(String(dataAtual));
@@ -324,6 +328,7 @@ export default function Sales() {
                     cliente={cliente}
                     itens={itens}
                     totalItens={totalItens}
+                    totalSemDesconto={totalSemDesconto}
                     totalFinal={totalFinal}
                     desconto={descontoNota}
                     data={data}

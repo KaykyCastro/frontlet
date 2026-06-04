@@ -20,14 +20,14 @@ export default function EditProduct({
   onClick,
   onClose,
   onUpdate
-} : EditProductProps ) {
+}: EditProductProps) {
 
-  const [produtoId, setProdutoId] = useState(Number)
+  const [produtoId, setProdutoId] = useState()
   const [nameEdit, setNameEdit] = useState("")
   const [codeEdit, setCodeEdit] = useState("")
-  const [priceEdit, setPriceEdit] = useState(Number)
-  const [quantityEdit, setQuantityEdit] = useState(Number)
-  const [categoryEdit, setCategoryEdit] = useState(Number)
+  const [priceEdit, setPriceEdit] = useState("")
+  const [quantityEdit, setQuantityEdit] = useState("")
+  const [categoryEdit, setCategoryEdit] = useState()
   const [category, setCategory] = useState<Category[]>([])
   const [showQuantity, setShowQuantity] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -46,8 +46,8 @@ export default function EditProduct({
     setProdutoId(id || 0)
     setNameEdit(nome || "")
     setCodeEdit(code || "")
-    setPriceEdit(preco || 0.00)
-    setQuantityEdit(estoque || 0)
+    setPriceEdit(String(preco ?? ""))
+    setQuantityEdit(String(estoque ?? ""))
     setCategoryEdit(categoriaId || 0)
   }, [nome, code, preco, estoque, categoriaId])
 
@@ -57,11 +57,10 @@ export default function EditProduct({
       id: produtoId,
       nome: nameEdit,
       code: codeEdit,
-      preco: Number(priceEdit),
-      estoque: Number(quantityEdit),
+      preco: priceEdit === "" ? 0 : Number(priceEdit),
+      estoque: quantityEdit === "" ? 0 : Number(quantityEdit),
       categoriaId: Number(categoryEdit)
     }
-
 
     try {
 
@@ -89,13 +88,14 @@ export default function EditProduct({
     }
   }
 
- async function deleteProduct () {
-    try{
-    
+  async function deleteProduct() {
+    try {
+
       const response = await fetch(
         `http://localhost:3000/produtos/${id}`,
         {
-          method: "DELETE"}
+          method: "DELETE"
+        }
       )
 
       onUpdate()
@@ -159,7 +159,7 @@ export default function EditProduct({
               readOnly={!showQuantity}
               min={0}
               value={showQuantity ? quantityEdit : "000000000"}
-              onChange={(e) => setQuantityEdit(Number(e.target.value))}
+              onChange={(e) => setQuantityEdit(e.target.value)}
             />
 
             {showQuantity ? (
@@ -181,8 +181,8 @@ export default function EditProduct({
             type="number"
             step="0.01"
             min="0"
-            value={priceEdit.toFixed(2)}
-            onChange={(e) => setPriceEdit(Number(e.target.value))}
+            value={(priceEdit)}
+            onChange={(e) => setPriceEdit(e.target.value)}
           />
         </section>
 
@@ -203,9 +203,9 @@ export default function EditProduct({
           </select>
         </section>
 
-        <section style={{display: "flex", flexDirection: "row", gap: "10px"}}>
-              <button onClick={atualizarProduto}>Salvar</button>
-              <button onClick={deleteProduct}>Deletar</button>
+        <section style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+          <button onClick={atualizarProduto}>Salvar</button>
+          <button onClick={deleteProduct}>Deletar</button>
         </section>
 
       </div>
