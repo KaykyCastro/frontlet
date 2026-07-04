@@ -58,51 +58,51 @@ export default function Dashboard() {
         a.click();
     };
 
-     const handleFileChange = (e : React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.currentTarget.files?.[0];
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.currentTarget.files?.[0];
 
-    if (!selectedFile) return;
+        if (!selectedFile) return;
 
-    if (!selectedFile.name.endsWith(".db")) {
-      alert("Selecione um arquivo .db");
-      return;
-    }
+        if (!selectedFile.name.endsWith(".db")) {
+            alert("Selecione um arquivo .db");
+            return;
+        }
 
-    setFile(selectedFile);
-  };
+        setFile(selectedFile);
+    };
 
-  const handleRestore = async () => {
-    if (!file) {
-      alert("Selecione um arquivo primeiro");
-      return;
-    }
+    const handleRestore = async () => {
+        if (!file) {
+            alert("Selecione um arquivo primeiro");
+            return;
+        }
 
-    if (!confirm("Isso vai sobrescrever o banco de dados atual. Deseja continuar?")) return;
+        if (!confirm("Isso vai sobrescrever o banco de dados atual. Deseja continuar?")) return;
 
-    const formData = new FormData();
-    formData.append("backup", file); 
+        const formData = new FormData();
+        formData.append("backup", file);
 
-    try {
-      const res = await fetch("http://localhost:3000/restore", {
-        method: "POST",
-        body: formData, 
-      });
+        try {
+            const res = await fetch("http://localhost:3000/restore", {
+                method: "POST",
+                body: formData,
+            });
 
-      const data = await res.json(); 
-      alert(data.message || data.error);
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao conectar com o servidor");
-    }
-};
+            const data = await res.json();
+            alert(data.message || data.error);
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao conectar com o servidor");
+        }
+    };
 
-    function selecionarProduto(produto : Produto) {
+    function selecionarProduto(produto: Produto) {
         setProdutoSelecionado(produto)
         setShowEdit(true)
         console.log(produto.id + "aa")
     }
 
-    async function registrarProduto(e : React.MouseEvent) {
+    async function registrarProduto(e: React.MouseEvent) {
         e.preventDefault()
 
         if (!nameRegister || !priceRegister || !quantityRegister || !codeRegister || !categoryRegister) {
@@ -135,17 +135,17 @@ export default function Dashboard() {
             })
 
             const data = await res.json()
-                setNameRegister("")
-                setPriceRegister(0)
-                setQuantityRegister("")
-                setCodeRegister("")
-                setCategoryRegister("") 
+            setNameRegister("")
+            setPriceRegister(0)
+            setQuantityRegister("")
+            setCodeRegister("")
+            setCategoryRegister("")
             if (!res.ok) {
                 alert(data.error || "Erro ao cadastrar produto");
                 return;
             }
 
-            
+
 
             carregarDados()
 
@@ -196,23 +196,23 @@ export default function Dashboard() {
 
     async function deletarCategoria() {
         try {
-            const categoryDel = category.find((p : Category) => p.nome === categoryNameRegister);
+            const categoryDel = category.find((p: Category) => p.nome === categoryNameRegister);
             const catId = categoryDel?.id;
 
             const response = await fetch(
                 `http://localhost:3000/categorias/${catId}`, {
                 method: "DELETE",
-                }
+            }
             )
 
             setCategoryNameRegister("")
             carregarDados()
             console.log(response)
-            
-        }catch (error) {
+
+        } catch (error) {
             console.error("Erro ao deletar categoria:", error)
         }
-    } 
+    }
 
     function filtrarProdutos() {
 
@@ -310,6 +310,8 @@ export default function Dashboard() {
                             nome={produto.nome}
                             code={produto.code}
                             preco={Number(produto.preco).toFixed(2)}
+                            desconto={produto.desconto}
+                            precoComDesconto={produto.precoComDesconto}
                             estoque={produto.estoque}
                             onClick={() => selecionarProduto(produto)}
                         />

@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard/Dashboard'
 import Sales from './components/Vendas/Sales'
 import NotaFiscal from './components/Vendas/NotaFiscal'
 import FinalizarDia from './components/Vendas/FinalizarDia'
+import Fiado from './fiado/Fiado'
+import FiadoCliente from './fiado/FiadoCliente'
 
 function App() {
   
@@ -18,6 +20,8 @@ function App() {
       <Route path='/Vendas' element={<Sales/>}/>
       <Route path='/Nota' element={<NotaFiscal/>}/>
       <Route path='/Finalizar' element={<FinalizarDia/>}/>
+      <Route path='/Clientes' element={<Fiado/>}/>
+      <Route path='/Clientes/Cliente' element={<FiadoCliente/>}/>
       </Route>
     </Routes>
   )

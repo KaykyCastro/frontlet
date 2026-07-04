@@ -26,23 +26,18 @@ export default function Sales() {
     const [descontoNota, setDescontoNota] = useState<number>()
     const [data, setData] = useState<string>()
 
-
     //Valores
     const [usuarioSelecionado, setUsuarioSelecionado] = useState<User>()
-    const [descontoInput, setDescontoInput] = useState(""); // controla o valor digitado
+    const [descontoInput, setDescontoInput] = useState("")
     const [desconto, setDesconto] = useState<{ tipo: "valor" | "percentual"; valor: number }>({
         tipo: "valor",
         valor: 0,
-    });
-
-    console.log(usuarioSelecionado + "taassa")
+    })
 
     //Produto selecionados
     const [productSelected, SetProductSelected] = useState<Produto>()
     const [cart, setCart] = useState<CartItem[]>([])
     const [metodoPagamento, setMetodoPagamento] = useState("")
-
-    console.log(cart)
 
     //Listagem
     const [users, SetUsers] = useState<User[]>([])
@@ -60,88 +55,152 @@ export default function Sales() {
         navigate("/")
     }
 
-    function handleGoFinalizar(){
+    function handleGoFinalizar() {
         navigate("/Finalizar")
+    }
+
+    function handleGoClientes() {
+        navigate("/Clientes")
     }
 
     const finalizarVenda = async (usarUsuario = false) => {
         try {
-            if (cart.length === 0) return alert("Carrinho vazio!");
+            if (cart.length === 0) return alert("Carrinho vazio!")
 
             const subtotalCarrinho = cart.reduce(
                 (acc, item) => acc + item.preco * item.quantidade,
                 0
-            );
-
-
+            )
 
             const itensComDesconto = cart.map((item) => {
-                let precoFinal = Number(item.preco);
+                let precoFinal = Number(item.preco)
 
                 if (desconto.tipo === "valor" && desconto.valor > 0) {
-                    const subtotalItem = precoFinal * item.quantidade;
-                    const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor;
-                    precoFinal = precoFinal - descontoProporcional / item.estoque;
+                    const subtotalItem = precoFinal * item.quantidade
+                    const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
+                    precoFinal = precoFinal - descontoProporcional / item.estoque
                 } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
-                    precoFinal = precoFinal * (1 - desconto.valor / 100);
+                    precoFinal = precoFinal * (1 - desconto.valor / 100)
                 }
 
                 return {
                     id: item.id,
                     quantidade: item.quantidade,
                     preco: Number(precoFinal.toFixed(2)),
-                };
-            });
-
+                }
+            })
 
             const body = {
                 itens: itensComDesconto,
                 usuarioId: usarUsuario ? usuarioSelecionado?.id : null,
-                metodoPag: metodoPagamento,
-            };
-
-
+                metodoPag: metodoPagamento || "FIADO",
+            }
 
             const response = await fetch("http://localhost:3000/vendas", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
-            });
+            })
 
             if (!response.ok) {
-                const text = await response.text();
-                throw new Error(text);
+                const text = await response.text()
+                throw new Error(text)
             }
 
-            await response.json();
+            await response.json()
 
-
-            const dataAtual = new Date().toLocaleDateString('pt-BR');
+            const dataAtual = new Date().toLocaleDateString('pt-BR')
             const totalComDesconto = calculaTotal()
 
-            setCliente(usuarioSelecionado);
-            setItens(cart);
+            setCliente(usuarioSelecionado)
+            setItens(cart)
             setTotalItens(cart.length)
             setTotalSemDesconto(subtotal)
-            setTotalFinal(totalComDesconto);
-            setDescontoNota(desconto.valor);
-            setData(String(dataAtual));
-            setShowNote(true);
+            setTotalFinal(totalComDesconto)
+            setDescontoNota(desconto.valor)
+            setData(String(dataAtual))
+            setShowNote(true)
 
-            setCart([]);
-            setDesconto({ tipo: "valor", valor: 0 });
-            setDescontoInput("");
-            buscarProdutos();
+            setCart([])
+            setDesconto({ tipo: "valor", valor: 0 })
+            setDescontoInput("")
+            buscarProdutos()
             setMetodoPagamento("")
 
-
-            alert("Venda finalizada com sucesso!");
+            alert("Venda finalizada com sucesso!")
         } catch (err) {
-            const error = err as Error;
-            console.error("Erro ao finalizar venda:", error.message);
-            alert(error.message);
+            const error = err as Error
+            console.error("Erro ao finalizar venda:", error.message)
+            alert(error.message)
         }
-    };
+    }
+
+    const inserirDebito = async () => {
+        if (!usuarioSelecionado) {
+            return alert("Selecione um cliente antes de inserir débito.")
+        }
+
+        if (cart.length === 0) {
+            return alert("Carrinho vazio!")
+        }
+
+        if (!confirm(`Inserir débito de R$ ${calculaTotal().toFixed(2)} para ${usuarioSelecionado.nome}?`)) return
+
+        try {
+            const subtotalCarrinho = cart.reduce(
+                (acc, item) => acc + item.preco * item.quantidade,
+                0
+            )
+
+            const itensComDesconto = cart.map((item) => {
+                let precoFinal = Number(item.preco)
+
+                if (desconto.tipo === "valor" && desconto.valor > 0) {
+                    const subtotalItem = precoFinal * item.quantidade
+                    const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
+                    precoFinal = precoFinal - descontoProporcional / item.estoque
+                } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
+                    precoFinal = precoFinal * (1 - desconto.valor / 100)
+                }
+
+                return {
+                    id: item.id,
+                    quantidade: item.quantidade,
+                    preco: Number(precoFinal.toFixed(2)),
+                }
+            })
+
+            const body = {
+                itens: itensComDesconto,
+                usuarioId: usuarioSelecionado.id,
+                metodoPag: metodoPagamento || "FIADO",
+            }
+
+            const response = await fetch("http://localhost:3000/vendas", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            })
+
+            if (!response.ok) {
+                const text = await response.text()
+                throw new Error(text)
+            }
+
+            setCart([])
+            setDesconto({ tipo: "valor", valor: 0 })
+            setDescontoInput("")
+            setUsuarioSelecionado(undefined)
+            setMetodoPagamento("")
+            buscarProdutos()
+
+            alert(`Débito inserido com sucesso para ${usuarioSelecionado.nome}!`)
+        } catch (err) {
+            const error = err as Error
+            console.error("Erro ao inserir débito:", error.message)
+            alert(error.message)
+        }
+    }
 
     async function buscarClientes() {
         const response = await fetch("http://localhost:3000/usuarios")
@@ -167,92 +226,72 @@ export default function Sales() {
         await buscarCategorias()
     }
 
-
     function filtrarProdutos() {
-
         const termo = searchText.toLowerCase()
 
         return products.filter((produto: Produto) => {
-
-            const nomeMatch =
-                produto.nome.toLowerCase().includes(termo)
-
-            const codigoMatch =
-                produto.code?.toLowerCase().includes(termo)
-
+            const nomeMatch = produto.nome.toLowerCase().includes(termo)
+            const codigoMatch = produto.code?.toLowerCase().includes(termo)
             const categoriaMatch =
                 categoryFilter === "" ||
                 produto.categoriaId === Number(categoryFilter)
 
             let statusMatch = true
-
-            if (statusFilter === "in") {
-                statusMatch = Number(produto.estoque) > 0
-            }
-
-            if (statusFilter === "out") {
-                statusMatch = Number(produto.estoque) === 0
-            }
+            if (statusFilter === "in") statusMatch = Number(produto.estoque) > 0
+            if (statusFilter === "out") statusMatch = Number(produto.estoque) === 0
 
             return (nomeMatch || codigoMatch) && categoriaMatch && statusMatch
         })
     }
 
     const addProduct = (produto: Produto) => {
-
-        const produtoAtual = products.find((p: Produto) => p.id === produto.id);
-
-        if (!produtoAtual) return;
+        const produtoAtual = products.find((p: Produto) => p.id === produto.id)
+        if (!produtoAtual) return
 
         if (produtoAtual.estoque <= 0) {
-            return alert("Produto sem estoque!");
+            return alert("Produto sem estoque!")
         }
 
+        const precoFinal = produtoAtual.precoComDesconto ?? produtoAtual.preco
+
         setCart((prev: CartItem[]) => {
-            const existente = prev.find((p) => p.id === produto.id);
+            const existente = prev.find((p) => p.id === produto.id)
 
             if (existente) {
-
                 if (existente.quantidade >= produtoAtual.estoque) {
-                    alert("Limite de estoque atingido!");
-                    return prev;
+                    alert("Limite de estoque atingido!")
+                    return prev
                 }
-
                 return prev.map((p) =>
                     p.id === produto.id
                         ? { ...p, quantidade: p.quantidade + 1 }
                         : p
-                );
+                )
             }
 
             const novoItem: CartItem = {
                 id: produto.id,
                 nome: produto.nome,
-                preco: produto.preco,
+                preco: precoFinal,
+                precoOriginal: produtoAtual.preco,
+                desconto: produtoAtual.desconto,
                 quantidade: 1,
                 estoque: produtoAtual.estoque,
                 code: produto.code,
-            };
+            }
 
-            return [...prev, novoItem];
-        });
-    };
-
-    function addUser(id: Number) {
-        const userId = id;
-
-        const user = users.find(u => u.id === userId) || null;
-
-
-        if (user != null) {
-            setUsuarioSelecionado(user);
-        }
+            return [...prev, novoItem]
+        })
     }
 
+    function addUser(id: Number) {
+        const user = users.find(u => u.id === id) || null
+        if (user != null) setUsuarioSelecionado(user)
+    }
 
     function increaseQuantity(id: number) {
-        const produtoAtual = products.find(p => p.id === id);
-        if (!produtoAtual || produtoAtual.estoque <= 0) return;
+        const produtoAtual = products.find(p => p.id === id)
+        if (!produtoAtual || produtoAtual.estoque <= 0) return
 
         setCart(prev =>
             prev.map(item =>
@@ -260,7 +299,7 @@ export default function Sales() {
                     ? { ...item, quantidade: Math.min(item.quantidade + 1, produtoAtual.estoque) }
                     : item
             )
-        );
+        )
     }
 
     function decreaseQuantity(id: number) {
@@ -272,59 +311,55 @@ export default function Sales() {
                         : item
                 )
                 .filter(item => item.quantidade > 0)
-        );
+        )
     }
 
     function removeProduct(id: number) {
-        setCart(prev =>
-            prev.filter(item => item.id !== id)
-        );
+        setCart(prev => prev.filter(item => item.id !== id))
     }
 
     const aplicarDesconto = (input: string) => {
-        if (!input) return alert("Insira um valor de desconto");
+        if (!input) return alert("Insira um valor de desconto")
 
-        let tipo: "valor" | "percentual" = "valor";
-        let valor = input.trim();
+        let tipo: "valor" | "percentual" = "valor"
+        let valor = input.trim()
 
         if (valor.endsWith("%")) {
-            tipo = "percentual";
-            valor = valor.replace("%", "");
+            tipo = "percentual"
+            valor = valor.replace("%", "")
         }
 
-        let numero = Number(valor.replace(",", "."));
+        let numero = Number(valor.replace(",", "."))
         if (isNaN(numero) || numero <= 0) {
-            return alert("Insira um valor válido para desconto");
+            return alert("Insira um valor válido para desconto")
         }
 
-        if (tipo === "percentual" && numero > 100) {
-            numero = 100;
-        }
+        if (tipo === "percentual" && numero > 100) numero = 100
 
-        setDesconto({ tipo, valor: numero });
-        setDescontoInput("");
-    };
+        setDesconto({ tipo, valor: numero })
+        setDescontoInput("")
+    }
 
     const subtotal = cart.reduce((acc, item) => {
         return acc + (Number(item.preco) * Number(item.quantidade))
     }, 0)
 
     const calculaTotal = () => {
-        let total = subtotal;
+        let total = subtotal
 
         if (desconto.tipo === "valor") {
-            total -= desconto.valor;
+            total -= desconto.valor
         } else if (desconto.tipo === "percentual") {
-            total -= (subtotal * desconto.valor) / 100;
+            total -= (subtotal * desconto.valor) / 100
         }
 
-        return Math.max(0, total); 
-    };
+        return Math.max(0, total)
+    }
 
     return (
         <div id="container-sales">
-            {
-                showNote ? <NotaFiscal
+            {showNote ? (
+                <NotaFiscal
                     cliente={cliente}
                     itens={itens}
                     totalItens={totalItens}
@@ -332,11 +367,11 @@ export default function Sales() {
                     totalFinal={totalFinal}
                     desconto={descontoNota}
                     data={data}
-                    onClose={()=> setShowNote(false)}
+                    onClose={() => setShowNote(false)}
                 />
-                    :
-                    <></>
-            }
+            ) : (
+                <></>
+            )}
 
             <div id="search-area">
                 <button onClick={handleGoBack} id="goback-btn">
@@ -354,7 +389,6 @@ export default function Sales() {
                     />
 
                     <div id="selects">
-
                         <select
                             value={categoryFilter}
                             onChange={(e) => setCategoryFilter(e.target.value)}
@@ -375,17 +409,19 @@ export default function Sales() {
                             <option value="in">Em estoque</option>
                             <option value="out">Sem estoque</option>
                         </select>
-
                     </div>
                 </div>
 
                 <div id="list-search">
                     {filtrarProdutos().map((produto: Produto) => (
                         <ProductList
+                            key={produto.id}
                             id={produto.id}
                             nome={produto.nome}
                             code={produto.code}
                             preco={produto.preco}
+                            desconto={produto.desconto}
+                            precoComDesconto={produto.precoComDesconto}
                             estoque={produto.estoque}
                             selected={productSelected?.id === produto.id}
                             onClick={() => SetProductSelected(produto)}
@@ -393,7 +429,9 @@ export default function Sales() {
                     ))}
                 </div>
 
-                <button id="add-btn" disabled={!productSelected} onClick={() => addProduct(productSelected!)}>Adicionar</button>
+                <button id="add-btn" disabled={!productSelected} onClick={() => addProduct(productSelected!)}>
+                    Adicionar
+                </button>
             </div>
 
             <div id="container-cart">
@@ -409,7 +447,7 @@ export default function Sales() {
 
                     <section id="products-cart">
                         {cart.map((produto) => (
-                            <div id="container-products-cart">
+                            <div id="container-products-cart" key={produto.id}>
                                 <span>{produto.nome}</span>
                                 <span>{produto.code}</span>
                                 <section id="quantity-product-cart">
@@ -418,13 +456,26 @@ export default function Sales() {
                                     <button id="plus-cart" onClick={() => increaseQuantity(produto.id)}>+</button>
                                 </section>
 
-                                <span>R${produto.preco.toFixed(2)}</span>
+                                <span>
+                                    {produto.desconto ? (
+                                        <>
+                                            <span style={{ textDecoration: "line-through", opacity: 0.6 }}>
+                                                De: R${produto.precoOriginal?.toFixed(2)}
+                                            </span>{" "}
+                                            Por: R${produto.preco.toFixed(2)}
+                                        </>
+                                    ) : (
+                                        <>R${produto.preco.toFixed(2)}</>
+                                    )}
+                                </span>
+
                                 <span>
                                     <TrashIcon
                                         onClick={() => removeProduct(produto.id)}
                                         color="red"
                                         weight="bold"
-                                        cursor="pointer" />
+                                        cursor="pointer"
+                                    />
                                 </span>
                             </div>
                         ))}
@@ -442,7 +493,7 @@ export default function Sales() {
                     <section id="clientes-select">
                         <span>Cliente:</span>
                         <select
-                            value={usuarioSelecionado?.nome}
+                            value={usuarioSelecionado?.id ?? ""}
                             onChange={(e) => addUser(Number(e.target.value))}
                         >
                             <option value="">Clientes</option>
@@ -474,12 +525,13 @@ export default function Sales() {
                             <span>Desconto:</span>
                             <section id="desconto">
                                 <input
-                                    value={descontoInput} // controlado pelo estado
+                                    value={descontoInput}
                                     onChange={(e) => setDescontoInput(e.target.value)}
-                                    placeholder="Insira o valor(R$ ou %)"></input>
-                                <button
-                                    onClick={() => aplicarDesconto(descontoInput)}
-                                >Aplicar</button>
+                                    placeholder="Insira o valor(R$ ou %)"
+                                />
+                                <button onClick={() => aplicarDesconto(descontoInput)}>
+                                    Aplicar
+                                </button>
                             </section>
                         </section>
                     </section>
@@ -491,18 +543,17 @@ export default function Sales() {
                         Finalizar Carrinho
                     </button>
 
-                    <button>
+                    <button onClick={inserirDebito}>
                         Inserir débito
                     </button>
 
-                    <button>
+                    <button onClick={handleGoClientes}>
                         Cadastrar e gerir clientes
                     </button>
 
                     <button onClick={handleGoFinalizar}>
                         Finalizar dia
                     </button>
-
                 </section>
 
             </div>

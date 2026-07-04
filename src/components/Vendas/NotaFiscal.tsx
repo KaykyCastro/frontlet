@@ -19,150 +19,158 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
     toBase64(logo).then(setLogoBase64);
   }, []);
 
-  useEffect(()=> {
-      initQZ().catch(console.error)
+  useEffect(() => {
+    initQZ().catch(console.error)
   }, [])
 
-const resizeImage = async (
-  base64: string,
-  width: number
-): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
+  const resizeImage = async (
+    base64: string,
+    width: number
+  ): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
 
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
 
-      canvas.width = width;
-      canvas.height = 140;
+        canvas.width = width;
+        canvas.height = 140;
 
-      const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d");
 
-      ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      resolve(canvas.toDataURL("image/png"));
-    };
+        resolve(canvas.toDataURL("image/png"));
+      };
 
-    img.src = base64;
-  });
-};
+      img.src = base64;
+    });
+  };
 
-const imprimirCupom = async () => {
-  try {
-    await initQZ();
+  const imprimirCupom = async () => {
+    try {
+      await initQZ();
 
-    const config = qz.configs.create("i9");
+      const config = qz.configs.create("i9");
 
-    // REDUZ A LOGO
-    const smallLogo = await resizeImage(logoBase64, 180);
+      // REDUZ A LOGO
+      const smallLogo = await resizeImage(logoBase64, 180);
 
-    const linha = "-".repeat(60);
+      const linha = "-".repeat(60);
 
-    // FUNÇÃO PARA QUEBRAR TEXTO
-    const quebrarTexto = (texto, tamanho) => {
-      const palavras = texto.split(" ");
-      const linhas = [];
+      // FUNÇÃO PARA QUEBRAR TEXTO
+      const quebrarTexto = (texto, tamanho) => {
+        const palavras = texto.split(" ");
+        const linhas = [];
 
-      let linhaAtual = "";
+        let linhaAtual = "";
 
-      for (const palavra of palavras) {
-        if ((linhaAtual + palavra).length > tamanho) {
+        for (const palavra of palavras) {
+          if ((linhaAtual + palavra).length > tamanho) {
+            linhas.push(linhaAtual.trim());
+            linhaAtual = palavra + " ";
+          } else {
+            linhaAtual += palavra + " ";
+          }
+        }
+
+        if (linhaAtual) {
           linhas.push(linhaAtual.trim());
-          linhaAtual = palavra + " ";
-        } else {
-          linhaAtual += palavra + " ";
         }
-      }
 
-      if (linhaAtual) {
-        linhas.push(linhaAtual.trim());
-      }
+        return linhas;
+      };
 
-      return linhas;
-    };
+      // FORMATAR ITENS
+      const itensTexto = itens.map((item) => {
+        // TAMANHO MÁXIMO DO NOME
+        const linhasNome = quebrarTexto(item.nome, 28);
 
-    // FORMATAR ITENS
-    const itensTexto = itens.map((item) => {
-      // TAMANHO MÁXIMO DO NOME
-      const linhasNome = quebrarTexto(item.nome, 28);
+        const qtd = `${item.quantidade}x`.padStart(6, " ");
 
-      const qtd = `${item.quantidade}x`.padStart(6, " ");
+        // VERIFICA SE TEM DESCONTO NO ITEM
+        const temDesconto =
+          item.precoOriginal !== undefined &&
+          item.precoOriginal !== item.preco;
 
-      const valor = item.preco
-        .toFixed(2)
-        .padStart(10, " ");
+        // SE TIVER DESCONTO, MOSTRA OS DOIS VALORES SEM SETA
+        // (impressora térmica não suporta tachado de forma universal via ESC/POS,
+        // então aqui vão os dois preços lado a lado)
+        const valor = temDesconto
+          ? `${item.precoOriginal.toFixed(2)} ${item.preco.toFixed(2)}`.padStart(10, " ")
+          : item.preco.toFixed(2).padStart(10, " ");
 
-      const total = (item.preco * item.quantidade)
-        .toFixed(2)
-        .padStart(10, " ");
+        const total = (item.preco * item.quantidade)
+          .toFixed(2)
+          .padStart(10, " ");
 
-      let texto = "";
+        let texto = "";
 
-      linhasNome.forEach((linhaNome, index) => {
-        // PRIMEIRA LINHA MOSTRA TUDO
-        if (index === 0) {
-          texto +=
-            linhaNome.padEnd(34, " ") +
-            qtd +
-            valor +
-            total +
-            "\n";
-        } else {
-          // RESTANTE MOSTRA SÓ O NOME
-          texto += linhaNome + "\n";
-        }
+        linhasNome.forEach((linhaNome, index) => {
+          // PRIMEIRA LINHA MOSTRA TUDO
+          if (index === 0) {
+            texto +=
+              linhaNome.padEnd(34, " ") +
+              qtd +
+              valor +
+              total +
+              "\n";
+          } else {
+            // RESTANTE MOSTRA SÓ O NOME
+            texto += linhaNome + "\n";
+          }
+        });
+
+        return texto;
       });
 
-      return texto;
-    });
+      const cupom = [
+        // RESET
+        "\x1B\x40",
 
-    const cupom = [
-      // RESET
-      "\x1B\x40",
+        // FONTE MENOR
+        "\x1BM\x01",
 
-      // FONTE MENOR
-      "\x1BM\x01",
+        // TEXTO COMPACTO
+        "\x1B!\x01",
 
-      // TEXTO COMPACTO
-      "\x1B!\x01",
+        // CENTRALIZAR
+        "\x1B\x61\x31",
 
-      // CENTRALIZAR
-      "\x1B\x61\x31",
-
-      // LOGO
-      {
-        type: "raw",
-        format: "image",
-        data: smallLogo,
-        options: {
-          language: "ESCPOS",
-          dotDensity: "single",
+        // LOGO
+        {
+          type: "raw",
+          format: "image",
+          data: smallLogo,
+          options: {
+            language: "ESCPOS",
+            dotDensity: "single",
+          },
         },
-      },
 
-      "\n",
+        "\n",
 
-      // EMPRESA
-      "\x1B\x45\x01",
-      "LET PRESENTES\n",
-      "\x1B\x45\x00",
+        // EMPRESA
+        "\x1B\x45\x01",
+        "LET PRESENTES\n",
+        "\x1B\x45\x00",
 
-      "Av. Bulevar I, 291",
-      "Jangurussu - Fortaleza/CE\n",
-      "CEP: 60866-280",
-      "CNPJ: 32.750.913.0001-11\n",
+        "Av. Bulevar I, 291",
+        "Jangurussu - Fortaleza/CE\n",
+        "CEP: 60866-280",
+        "CNPJ: 32.750.913.0001-11\n",
 
-      "\n",
+        "\n",
 
-      `Data: ${data}\n`,
+        `Data: ${data}\n`,
 
-      "\n",
+        "\n",
 
-      linha + "\n",
+        linha + "\n",
 
-      // CLIENTE
-      cliente
-        ? [
+        // CLIENTE
+        cliente
+          ? [
             "\x1B\x61\x30",
 
             "\x1B\x45\x01",
@@ -179,65 +187,65 @@ const imprimirCupom = async () => {
 
             linha + "\n",
           ]
-        : [],
+          : [],
 
-      // TITULO
-      "\x1B\x61\x31",
+        // TITULO
+        "\x1B\x61\x31",
 
-      "\x1B\x45\x01",
-      "RECIBO FISCAL\n",
-      "\x1B\x45\x00",
+        "\x1B\x45\x01",
+        "RECIBO FISCAL\n",
+        "\x1B\x45\x00",
 
-      "\n",
+        "\n",
 
-      // ITENS
-      "\x1B\x61\x00",
+        // ITENS
+        "\x1B\x61\x00",
 
-      "PRODUTO                                QTD    VALOR    TOTAL\n",
+        "PRODUTO                                QTD    VALOR    TOTAL\n",
 
-      linha + "\n",
+        linha + "\n",
 
-      ...itensTexto,
+        ...itensTexto,
 
-      linha + "\n",
+        linha + "\n",
 
-      "\n",
+        "\n",
 
-      `Total itens: ${totalItens}\n`,
-      `Valor Total: R$ ${totalSemDesconto.toFixed(2)}\n`,
-      `Desconto: R$ ${desconto?.toFixed(2)}\n`, 
+        `Total itens: ${totalItens}\n`,
+        `Valor Total: R$ ${totalSemDesconto.toFixed(2)}\n`,
+        `Desconto: R$ ${desconto?.toFixed(2)}\n`,
 
-      "\n",
+        "\n",
 
-      linha + "\n",
+        linha + "\n",
 
-      // TOTAL DESTACADO
-      "\x1B\x61\x31",
+        // TOTAL DESTACADO
+        "\x1B\x61\x31",
 
-      "\x1D\x21\x11",
+        "\x1D\x21\x11",
 
-      `A PAGAR: R$ ${totalFinal?.toFixed(2)}\n`,
+        `A PAGAR: R$ ${totalFinal?.toFixed(2)}\n`,
 
-      "\x1D\x21\x00",
+        "\x1D\x21\x00",
 
-      
-      "\n\n",
 
-      "Obrigado pela preferenciar e volte sempre!\n",
+        "\n\n",
 
-      "\n\n\n\n",
+        "Obrigado pela preferenciar e volte sempre!\n",
 
-      // CORTE
-      "\x1D\x56\x41\x03",
-    ].flat();
+        "\n\n\n\n",
 
-    await qz.print(config, cupom);
+        // CORTE
+        "\x1D\x56\x41\x03",
+      ].flat();
 
-    console.log("Impresso com sucesso");
-  } catch (err) {
-    console.error(err);
-  }
-};
+      await qz.print(config, cupom);
+
+      console.log("Impresso com sucesso");
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const notaRef = useRef<HTMLDivElement>(null);
 
   const toBase64 = async (url: string) => {
@@ -263,7 +271,7 @@ const imprimirCupom = async () => {
   return (
     <div id="bg-nota">
       <div id="container-fiscal">
-          
+
         <section id="nota-header">
           <button id="btn-close" onClick={handleClose}>
             <XIcon size={16} weight="bold" color="black"></XIcon>
@@ -319,12 +327,18 @@ const imprimirCupom = async () => {
 
             <section>
               {itens?.map((item) => (
-                <div
-                  id="body-itens"
-                >
+                <div id="body-itens" key={item.id}>
                   <p id="name-item">{item.nome}</p>
                   <p>{item.quantidade}x</p>
-                  <p>{item.preco.toFixed(2)}</p>
+                  <p>
+                    {item.precoOriginal && item.precoOriginal !== item.preco
+                      ? (
+                        <>
+                          <s>{item.precoOriginal.toFixed(2)}</s> {item.preco.toFixed(2)}
+                        </>
+                      )
+                      : item.preco.toFixed(2)}
+                  </p>
                   <p>{(item.preco * item.quantidade).toFixed(2)}</p>
                 </div>
               ))}

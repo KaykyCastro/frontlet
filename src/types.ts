@@ -2,6 +2,8 @@ export type Produto = {
     id : number,
     nome : string,
     preco : number,
+    desconto? : number | null,
+    precoComDesconto? : number | null,
     estoque : number,
     code? : string
     categoriaId? : number
@@ -9,6 +11,8 @@ export type Produto = {
 
 export type CartItem = Omit<Produto, 'categoriaId'> & {
     quantidade: number
+    preco: number         
+    precoOriginal?: number
 };
 
 export type Note = {

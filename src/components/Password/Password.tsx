@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import "./password.css"
 
 const STORED_HASH =
-"150209"
+  "150209"
 
 type PopupProps = {
   onClose: () => void
@@ -51,40 +51,35 @@ export default function Password({ onClose, onSuccess }: PopupProps) {
   }, [onClose])
 
   return (
-   <div id="bg-password">
+    <div id="bg-password">
+      <div
+        id="container-password"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div id="header-password">
+          <text>Insira sua senha:</text>
+          <button id="close-btn" onClick={onClose}>
+            ✕
+          </button>
+        </div>
 
-  <div
-    id="container-password"
-    onClick={(e) => e.stopPropagation()}
-  >
+        <form onSubmit={(e) => { e.preventDefault(); handleLogin() }}>
+          <input
+            id="text-password"
+            type="password"
+            placeholder="Insira sua senha aqui:"
+            autoFocus
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-    <div id="header-password">
+          <button id="enter-btn" type="submit">
+            Entrar
+          </button>
 
-      <text>Insira sua senha:</text>
-
-      <button id="close-btn" onClick={onClose}>
-        ✕
-      </button>
-
+          {error && <p>{error}</p>}
+        </form>
+      </div>
     </div>
-
-    <input
-      id="text-password"
-      type="password"
-      placeholder="Insira sua senha aqui:"
-      autoFocus
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-    />
-
-    <button id="enter-btn" onClick={handleLogin}>
-      Entrar
-    </button>
-
-    {error && <p>{error}</p>}
-
-  </div>
-
-</div>
   )
 }

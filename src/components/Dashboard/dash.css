@@ -76,12 +76,14 @@ select {
 
 #search-input:focus {
     border: 3px solid;
-     border-color: #e69216;
+    border-color: #e69216;
 }
 
 #list-search {
     box-sizing: border-box;
     display: block;
+    justify-content: flex-start;
+    align-items: stretch;
     width: 42vw;
     height: 400px;
     padding: 10px;
@@ -117,8 +119,9 @@ select {
     scrollbar-width: thin;
     scrollbar-color: #ffb13c transparent;
 }
+
 #register-area {
-    box-sizing: border-box  ;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -167,26 +170,28 @@ select {
 }
 
 #register-area button {
-  border-radius: 20px;
-  border: 2px solid #e69216;
-  width: 100%;
-  height: 40px;
-  font-size: 0.8em;
-  font-weight: 500;
-  font-family: inherit;
-  color: black;
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: border-color 0.25s;
+    border-radius: 20px;
+    border: 2px solid #e69216;
+    width: 100%;
+    height: 40px;
+    font-size: 0.8em;
+    font-weight: 500;
+    font-family: inherit;
+    color: black;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.25s;
 }
+
 #register-area button:hover {
-  color: white;
-  background-color:#e69216 ;
-  border-color: #ffc671;
+    color: white;
+    background-color: #e69216;
+    border-color: #ffc671;
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+    outline: 4px auto -webkit-focus-ring-color;
 }
 
 #register-area #backup-btn {

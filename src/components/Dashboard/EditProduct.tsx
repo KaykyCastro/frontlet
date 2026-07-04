@@ -15,6 +15,7 @@ export default function EditProduct({
   nome,
   code,
   preco,
+  desconto,
   estoque,
   categoriaId,
   onClick,
@@ -26,6 +27,7 @@ export default function EditProduct({
   const [nameEdit, setNameEdit] = useState("")
   const [codeEdit, setCodeEdit] = useState("")
   const [priceEdit, setPriceEdit] = useState("")
+  const [descontoEdit, setDescontoEdit] = useState("")
   const [quantityEdit, setQuantityEdit] = useState("")
   const [categoryEdit, setCategoryEdit] = useState()
   const [category, setCategory] = useState<Category[]>([])
@@ -47,17 +49,25 @@ export default function EditProduct({
     setNameEdit(nome || "")
     setCodeEdit(code || "")
     setPriceEdit(String(preco ?? ""))
+    setDescontoEdit(desconto != null ? String(desconto) : "")
     setQuantityEdit(String(estoque ?? ""))
     setCategoryEdit(categoriaId || 0)
-  }, [nome, code, preco, estoque, categoriaId])
+  }, [nome, code, preco, desconto, estoque, categoriaId])
 
   async function atualizarProduto() {
+
+    const descontoNumero = descontoEdit === "" ? null : Number(descontoEdit)
+
+    if (descontoNumero !== null && (isNaN(descontoNumero) || descontoNumero < 0 || descontoNumero > 100)) {
+      return alert("Desconto inválido. Use um valor entre 0 e 100.")
+    }
 
     const produtoAtualizado = {
       id: produtoId,
       nome: nameEdit,
       code: codeEdit,
       preco: priceEdit === "" ? 0 : Number(priceEdit),
+      desconto: descontoNumero,
       estoque: quantityEdit === "" ? 0 : Number(quantityEdit),
       categoriaId: Number(categoryEdit)
     }
@@ -181,8 +191,21 @@ export default function EditProduct({
             type="number"
             step="0.01"
             min="0"
-            value={(priceEdit)}
+            value={priceEdit}
             onChange={(e) => setPriceEdit(e.target.value)}
+          />
+        </section>
+
+        <section>
+          <label>Desconto (%) — opcional:</label>
+          <input
+            type="number"
+            step="1"
+            min="0"
+            max="100"
+            placeholder="Sem desconto"
+            value={descontoEdit}
+            onChange={(e) => setDescontoEdit(e.target.value)}
           />
         </section>
 
