@@ -2,6 +2,7 @@ export type Produto = {
     id : number,
     nome : string,
     preco : number,
+    tipoDesconto? : string,
     desconto? : number | null,
     precoComDesconto? : number | null,
     estoque : number,
@@ -25,11 +26,12 @@ export type Note = {
 };
 
 export type User = {
-    id : number,
-    nome : string, 
-    cpf : string,
-    endereco: string,
-    divida : number,
+  id: number
+  nome: string
+  cpf?: string
+  telefone: string
+  endereco: string
+  divida: number | string
 }
 
 export type Category = {

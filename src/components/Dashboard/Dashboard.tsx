@@ -24,6 +24,7 @@ export default function Dashboard() {
     const [priceRegister, setPriceRegister] = useState<Number>()
     const [codeRegister, setCodeRegister] = useState("")
     const [categoryRegister, setCategoryRegister] = useState("")
+    const [descontoRegister, setDescontoRegister] = useState("")
 
     //Cadastro categoria
     const [categoryNameRegister, setCategoryNameRegister] = useState("")
@@ -109,12 +110,28 @@ export default function Dashboard() {
             return alert("Preencha todos os campos!");
         }
 
+        const textoDesconto = descontoRegister.trim()
+
+        if (textoDesconto !== "") {
+            const semSinal = textoDesconto.replace("%", "").replace(",", ".")
+            const valorNumerico = Number(semSinal)
+
+            if (isNaN(valorNumerico) || valorNumerico <= 0) {
+                return alert("Desconto inválido. Use um número (ex: 10) ou uma porcentagem (ex: 10%).")
+            }
+
+            if (textoDesconto.endsWith("%") && valorNumerico > 100) {
+                return alert("Desconto percentual não pode passar de 100%.")
+            }
+        }
+
         const produto = {
             nome: nameRegister.trim(),
             code: codeRegister.trim(),
             preco: Number(priceRegister),
             estoque: Number(quantityRegister),
-            categoriaId: Number(categoryRegister)
+            categoriaId: Number(categoryRegister),
+            desconto: textoDesconto
         }
 
         if (isNaN(produto.preco) || produto.preco <= 0) {
@@ -140,6 +157,7 @@ export default function Dashboard() {
             setQuantityRegister("")
             setCodeRegister("")
             setCategoryRegister("")
+            setDescontoRegister("")
             if (!res.ok) {
                 alert(data.error || "Erro ao cadastrar produto");
                 return;
@@ -254,6 +272,8 @@ export default function Dashboard() {
                     nome={produtoSelecionado.nome}
                     code={produtoSelecionado.code}
                     preco={produtoSelecionado.preco}
+                    desconto={produtoSelecionado.desconto}
+                    tipoDesconto={produtoSelecionado.tipoDesconto}
                     estoque={produtoSelecionado.estoque}
                     categoriaId={produtoSelecionado.categoriaId}
                     onClose={() => setShowEdit(false)}
@@ -333,6 +353,7 @@ export default function Dashboard() {
                         <section>
                             <text>Nome do produto:</text>
                             <input
+                                value={nameRegister}
                                 onChange={(e) => setNameRegister(e.target.value)}
                             />
                         </section>
@@ -340,6 +361,7 @@ export default function Dashboard() {
                         <section>
                             <text>Código do produto:</text>
                             <input
+                                value={codeRegister}
                                 onChange={(e) => setCodeRegister(e.target.value)}
                             />
                         </section>
@@ -349,6 +371,7 @@ export default function Dashboard() {
                             <input
                                 type="number"
                                 min="0"
+                                value={quantityRegister}
                                 onChange={(e) => setQuantityRegister(e.target.value)}
                             />
                         </section>
@@ -359,7 +382,18 @@ export default function Dashboard() {
                                 type="number"
                                 step="0.01"
                                 min="0"
+                                value={priceRegister as any}
                                 onChange={(e) => setPriceRegister(e.target.value)}
+                            />
+                        </section>
+
+                        <section>
+                            <text>Desconto — opcional (ex: 10 ou 10%):</text>
+                            <input
+                                type="text"
+                                placeholder="Sem desconto"
+                                value={descontoRegister}
+                                onChange={(e) => setDescontoRegister(e.target.value)}
                             />
                         </section>
 

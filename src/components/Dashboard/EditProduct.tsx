@@ -16,6 +16,7 @@ export default function EditProduct({
   code,
   preco,
   desconto,
+  tipoDesconto,
   estoque,
   categoriaId,
   onClick,
@@ -49,17 +50,35 @@ export default function EditProduct({
     setNameEdit(nome || "")
     setCodeEdit(code || "")
     setPriceEdit(String(preco ?? ""))
-    setDescontoEdit(desconto != null ? String(desconto) : "")
+
+    // RECONSTRÓI O TEXTO DO DESCONTO A PARTIR DE desconto + tipoDesconto
+    if (desconto != null && desconto !== "") {
+      setDescontoEdit(
+        tipoDesconto === "percentual" ? `${desconto}%` : String(desconto)
+      )
+    } else {
+      setDescontoEdit("")
+    }
+
     setQuantityEdit(String(estoque ?? ""))
     setCategoryEdit(categoriaId || 0)
-  }, [nome, code, preco, desconto, estoque, categoriaId])
+  }, [nome, code, preco, desconto, tipoDesconto, estoque, categoriaId])
 
   async function atualizarProduto() {
 
-    const descontoNumero = descontoEdit === "" ? null : Number(descontoEdit)
+    const textoDesconto = descontoEdit.trim()
 
-    if (descontoNumero !== null && (isNaN(descontoNumero) || descontoNumero < 0 || descontoNumero > 100)) {
-      return alert("Desconto inválido. Use um valor entre 0 e 100.")
+    if (textoDesconto !== "") {
+      const semSinal = textoDesconto.replace("%", "").replace(",", ".")
+      const valorNumerico = Number(semSinal)
+
+      if (isNaN(valorNumerico) || valorNumerico <= 0) {
+        return alert("Desconto inválido. Use um número (ex: 10) ou uma porcentagem (ex: 10%).")
+      }
+
+      if (textoDesconto.endsWith("%") && valorNumerico > 100) {
+        return alert("Desconto percentual não pode passar de 100%.")
+      }
     }
 
     const produtoAtualizado = {
@@ -67,7 +86,7 @@ export default function EditProduct({
       nome: nameEdit,
       code: codeEdit,
       preco: priceEdit === "" ? 0 : Number(priceEdit),
-      desconto: descontoNumero,
+      desconto: textoDesconto,
       estoque: quantityEdit === "" ? 0 : Number(quantityEdit),
       categoriaId: Number(categoryEdit)
     }
@@ -197,16 +216,20 @@ export default function EditProduct({
         </section>
 
         <section>
-          <label>Desconto (%) — opcional:</label>
-          <input
-            type="number"
-            step="1"
-            min="0"
-            max="100"
-            placeholder="Sem desconto"
-            value={descontoEdit}
-            onChange={(e) => setDescontoEdit(e.target.value)}
-          />
+          <label>Desconto — opcional (ex: 10 ou 10%):</label>
+          <div style={{ display: "flex", gap: "6px" }}>
+            <input
+              type="text"
+              placeholder="Sem desconto"
+              value={descontoEdit}
+              onChange={(e) => setDescontoEdit(e.target.value)}
+            />
+            {descontoEdit && (
+              <button type="button" onClick={() => setDescontoEdit("")}>
+                Remover
+              </button>
+            )}
+          </div>
         </section>
 
         <section>

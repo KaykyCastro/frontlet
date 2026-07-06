@@ -43,6 +43,7 @@ export default function FiadoCliente() {
     const [showEdit, setShowEdit] = useState(false)
     const [nameEdit, setNameEdit] = useState("")
     const [cpfEdit, setCpfEdit] = useState("")
+    const [telefoneEdit, setTelefoneEdit] = useState("")
     const [enderecoEdit, setEnderecoEdit] = useState("")
 
     //Registrar pagamento
@@ -82,7 +83,8 @@ export default function FiadoCliente() {
     function abrirEdicao() {
         if (!cliente) return
         setNameEdit(cliente.nome)
-        setCpfEdit(cliente.cpf)
+        setCpfEdit(cliente.cpf || "")
+        setTelefoneEdit(cliente.telefone)
         setEnderecoEdit(cliente.endereco)
         setShowEdit(true)
     }
@@ -90,8 +92,8 @@ export default function FiadoCliente() {
     async function salvarEdicaoCliente() {
         if (!cliente) return
 
-        if (!nameEdit || !cpfEdit || !enderecoEdit) {
-            return alert("Preencha todos os campos!")
+        if (!nameEdit || !telefoneEdit || !enderecoEdit) {
+            return alert("Preencha nome, telefone e endereço!")
         }
 
         try {
@@ -100,7 +102,8 @@ export default function FiadoCliente() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     nome: nameEdit.trim(),
-                    cpf: cpfEdit.trim(),
+                    cpf: cpfEdit.trim() || null,
+                    telefone: telefoneEdit.trim(),
                     endereco: enderecoEdit.trim(),
                 }),
             })
@@ -221,7 +224,15 @@ export default function FiadoCliente() {
                         </section>
 
                         <section>
-                            <label>CPF:</label>
+                            <label>Telefone:</label>
+                            <input
+                                value={telefoneEdit}
+                                onChange={(e) => setTelefoneEdit(e.target.value)}
+                            />
+                        </section>
+
+                        <section>
+                            <label>CPF (opcional):</label>
                             <input
                                 value={cpfEdit}
                                 onChange={(e) => setCpfEdit(e.target.value)}
@@ -257,6 +268,7 @@ export default function FiadoCliente() {
                             <h1 style={{ margin: "0 0 4px 0" }}>{cliente.nome}</h1>
                             <p className="info-secundaria">CPF: {cliente.cpf}</p>
                             <p className="info-secundaria">Endereço: {cliente.endereco}</p>
+                            <p className="info-secundaria">Telefone: {cliente.telefone}</p>
                         </div>
                         <div id="divida-area">
                             <span>Dívida atual</span>

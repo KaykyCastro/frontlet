@@ -17,8 +17,10 @@ export default function Fiado() {
     const [searchText, setSearchText] = useState("")
 
     //Cadastro cliente
+    //Cadastro cliente
     const [nameRegister, setNameRegister] = useState("")
     const [cpfRegister, setCpfRegister] = useState("")
+    const [telefoneRegister, setTelefoneRegister] = useState("")
     const [enderecoRegister, setEnderecoRegister] = useState("")
 
     useEffect(() => {
@@ -38,13 +40,14 @@ export default function Fiado() {
     async function registrarCliente(e: React.MouseEvent) {
         e.preventDefault()
 
-        if (!nameRegister || !cpfRegister || !enderecoRegister) {
-            return alert("Preencha todos os campos!")
+        if (!nameRegister || !telefoneRegister || !enderecoRegister) {
+            return alert("Preencha nome, telefone e endereço!")
         }
 
         const cliente = {
             nome: nameRegister.trim(),
-            cpf: cpfRegister.trim(),
+            cpf: cpfRegister.trim() || null,
+            telefone: telefoneRegister.trim(),
             endereco: enderecoRegister.trim(),
         }
 
@@ -64,6 +67,7 @@ export default function Fiado() {
 
             setNameRegister("")
             setCpfRegister("")
+            setTelefoneRegister("")
             setEnderecoRegister("")
 
             buscarClientes()
@@ -122,6 +126,11 @@ export default function Fiado() {
                                         >
                                             R$ {Number(cliente.divida).toFixed(2)}
                                         </span>
+
+                                        <span style={{ marginLeft: "10px" }}>
+                                            Telefone:{" "}
+                                            <span className="data">{cliente.telefone}</span>
+                                        </span>
                                     </span>
                                 </div>
                             </div>
@@ -139,7 +148,7 @@ export default function Fiado() {
                     <div className="container-register">
 
                         <text>Cadastrar Cliente</text>
-
+                        
                         <section>
                             <text>Nome:</text>
                             <input
@@ -149,7 +158,15 @@ export default function Fiado() {
                         </section>
 
                         <section>
-                            <text>CPF:</text>
+                            <text>Telefone:</text>
+                            <input
+                                value={telefoneRegister}
+                                onChange={(e) => setTelefoneRegister(e.target.value)}
+                            />
+                        </section>
+
+                        <section>
+                            <text>CPF (opcional):</text>
                             <input
                                 value={cpfRegister}
                                 onChange={(e) => setCpfRegister(e.target.value)}
