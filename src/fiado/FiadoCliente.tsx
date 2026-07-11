@@ -45,6 +45,7 @@ export default function FiadoCliente() {
     const [cpfEdit, setCpfEdit] = useState("")
     const [telefoneEdit, setTelefoneEdit] = useState("")
     const [enderecoEdit, setEnderecoEdit] = useState("")
+    const [dividaEdit, setDividaEdit] = useState("")
 
     //Registrar pagamento
     const [valorPagamento, setValorPagamento] = useState("")
@@ -86,7 +87,32 @@ export default function FiadoCliente() {
         setCpfEdit(cliente.cpf || "")
         setTelefoneEdit(cliente.telefone)
         setEnderecoEdit(cliente.endereco)
+        setDividaEdit(Number(cliente.divida).toFixed(2).replace(".", ","))
         setShowEdit(true)
+    }
+
+    // Mesma máscara usada no campo de pagamento: digita e formata como "120,00"
+    function formatarValorDigitado(input: string) {
+        const apenasDigitos = input.replace(/\D/g, "")
+
+        if (!apenasDigitos) return ""
+
+        const numero = Number(apenasDigitos) / 100
+
+        return numero.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })
+    }
+
+    function handleDividaEditChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setDividaEdit(formatarValorDigitado(e.target.value))
+    }
+
+    // Converte "1.234,56" de volta para número (1234.56)
+    function paraNumero(valorFormatado: string) {
+        const limpo = valorFormatado.replace(/\./g, "").replace(",", ".")
+        return Number(limpo)
     }
 
     async function salvarEdicaoCliente() {
@@ -94,6 +120,12 @@ export default function FiadoCliente() {
 
         if (!nameEdit || !telefoneEdit || !enderecoEdit) {
             return alert("Preencha nome, telefone e endereço!")
+        }
+
+        const dividaNumerica = paraNumero(dividaEdit)
+
+        if (isNaN(dividaNumerica) || dividaNumerica < 0) {
+            return alert("Insira um valor de dívida válido")
         }
 
         try {
@@ -105,6 +137,7 @@ export default function FiadoCliente() {
                     cpf: cpfEdit.trim() || null,
                     telefone: telefoneEdit.trim(),
                     endereco: enderecoEdit.trim(),
+                    divida: dividaNumerica,
                 }),
             })
 
@@ -146,27 +179,12 @@ export default function FiadoCliente() {
 
     // Formata enquanto digita, no padrão "120,00" — considera os dígitos
     // digitados como centavos, igual máscara de valor monetário de app bancário.
-    function formatarValorDigitado(input: string) {
-        const apenasDigitos = input.replace(/\D/g, "")
-
-        if (!apenasDigitos) return ""
-
-        const numero = Number(apenasDigitos) / 100
-
-        return numero.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        })
-    }
-
     function handleValorPagamentoChange(e: React.ChangeEvent<HTMLInputElement>) {
         setValorPagamento(formatarValorDigitado(e.target.value))
     }
 
-    // Converte "1.234,56" de volta para número (1234.56) antes de enviar ao backend
     function valorPagamentoNumerico() {
-        const limpo = valorPagamento.replace(/\./g, "").replace(",", ".")
-        return Number(limpo)
+        return paraNumero(valorPagamento)
     }
 
     async function registrarPagamento() {
@@ -244,6 +262,16 @@ export default function FiadoCliente() {
                             <input
                                 value={enderecoEdit}
                                 onChange={(e) => setEnderecoEdit(e.target.value)}
+                            />
+                        </section>
+
+                        <section>
+                            <label>Dívida (R$):</label>
+                            <input
+                                inputMode="numeric"
+                                placeholder="0,00"
+                                value={dividaEdit}
+                                onChange={handleDividaEditChange}
                             />
                         </section>
 
