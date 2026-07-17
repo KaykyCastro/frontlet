@@ -291,10 +291,9 @@
 
 #header-modal-edit-cliente {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     align-items: center;
     width: 100%;
+    padding-right: 40px;
 }
 
 #header-modal-edit-cliente h1 {
@@ -304,7 +303,9 @@
 }
 
 #close-btn-edit-cliente {
-    position: static;
+    position: absolute;
+    top: 24px;
+    right: 24px;
     background-color: #e69216;
     color: white;
     border: none;
@@ -313,7 +314,11 @@
     height: 32px;
     font-size: 14px;
     cursor: pointer;
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 1;
 }
 
 #close-btn-edit-cliente:hover {
@@ -335,6 +340,8 @@
     font-size: 13px;
     font-weight: 600;
     color: #444;
+    text-align: left;
+    display: block;
 }
 
 #container-edit-cliente input {

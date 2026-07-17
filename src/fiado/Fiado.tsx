@@ -139,13 +139,13 @@ export default function Fiado() {
                 </div>
             </div>
 
-            <div id="register-area">
+            <div id="register-area-cliente">
 
                 <h1>Cadastrar:</h1>
 
                 <div id="register-carts">
 
-                    <div className="container-register">
+                    <div className="container-register-cliente">
 
                         <text>Cadastrar Cliente</text>
                         

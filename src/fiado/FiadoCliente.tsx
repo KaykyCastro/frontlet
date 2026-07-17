@@ -232,7 +232,7 @@ export default function FiadoCliente() {
 
                         <div id="header-modal-edit">
                             <h1>Editar Cliente</h1>
-                            <button id="close-btn-edit" onClick={() => setShowEdit(false)}>
+                            <button id="close-btn-edit-cliente" onClick={() => setShowEdit(false)}>
                                 ✕
                             </button>
                         </div>
