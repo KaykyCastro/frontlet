@@ -72,6 +72,15 @@
     margin: 2px 0;
     font-size: 13px;
     color: #777;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.observacao-texto {
+    max-height: 60px;
+    overflow-y: auto;
+    display: block;
+    padding-right: 4px;
 }
 
 #divida-area {
@@ -250,14 +259,115 @@
     color: #222;
 }
 
-/* ---------- Modal de edição (mesma estrutura do EditProduct) ---------- */
+/* ---------- Modal de edição do cliente (ID próprio, não conflita com o de produto) ---------- */
 
-#container-edit {
+#bg-edit {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+#container-edit-cliente {
+    box-sizing: border-box;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 380px;
+    max-height: 85vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    width: 300px;
-    justify-content: start;
+    align-items: stretch;
+    gap: 14px;
+}
+
+#header-modal-edit {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    width: 100%;
+}
+
+#header-modal-edit h1 {
+    margin: 0;
+    font-size: 22px;
+    color: #965b04;
+}
+
+#close-btn-edit {
+    background: #e69216;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+#close-btn-edit:hover {
+    background: #d6820a;
+}
+
+#container-edit-cliente section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+#container-edit-cliente label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+#container-edit-cliente input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+#container-edit-cliente input:focus {
+    outline: none;
+    border-color: #e69216;
+}
+
+#container-edit-cliente textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+}
+
+#container-edit-cliente textarea:focus {
+    outline: none;
+    border-color: #e69216;
+}
+
+#container-edit-cliente button {
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #e69216;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    flex: 1;
 }
 
 /* ---------- Responsivo ---------- */
@@ -283,4 +393,4 @@
     #divida-area {
         align-items: flex-start;
     }
-}
+}   
