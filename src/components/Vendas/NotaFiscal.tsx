@@ -182,13 +182,13 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
             `Nome: ${cliente.nome}\n`,
             `CPF/CNPJ: ${cliente.cpf}\n`,
             `Endereco: ${cliente.endereco}\n`,
+            cliente.divida !== undefined ? `Divida atual: R$ ${Number(cliente.divida).toFixed(2)}\n` : "",
 
             "\n",
 
             linha + "\n",
           ]
           : [],
-
         // TITULO
         "\x1B\x61\x31",
 
@@ -308,6 +308,13 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
                   <span>Endereço:</span>
                   <span className="data">{cliente?.endereco}</span>
                 </p>
+
+                {cliente?.divida !== undefined && (
+                  <p>
+                    <span>Dívida atual:</span>
+                    <span className="data">R$ {Number(cliente.divida).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </p>
+                )}
               </section>
             </>
             :

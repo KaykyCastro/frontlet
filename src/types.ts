@@ -29,6 +29,7 @@ export type User = {
   id: number
   nome: string
   cpf?: string
+  observacao?: string
   telefone: string
   endereco: string
   divida: number | string

@@ -46,6 +46,7 @@ export default function FiadoCliente() {
     const [telefoneEdit, setTelefoneEdit] = useState("")
     const [enderecoEdit, setEnderecoEdit] = useState("")
     const [dividaEdit, setDividaEdit] = useState("")
+    const [observacaoEdit, setObservacaoEdit] = useState("")
 
     //Registrar pagamento
     const [valorPagamento, setValorPagamento] = useState("")
@@ -88,6 +89,7 @@ export default function FiadoCliente() {
         setTelefoneEdit(cliente.telefone)
         setEnderecoEdit(cliente.endereco)
         setDividaEdit(Number(cliente.divida).toFixed(2).replace(".", ","))
+        setObservacaoEdit(cliente.observacao || "")
         setShowEdit(true)
     }
 
@@ -138,6 +140,7 @@ export default function FiadoCliente() {
                     telefone: telefoneEdit.trim(),
                     endereco: enderecoEdit.trim(),
                     divida: dividaNumerica,
+                    observacao: observacaoEdit.trim() || null,
                 }),
             })
 
@@ -224,14 +227,15 @@ export default function FiadoCliente() {
         <div id="container-fiado-cliente">
 
             {showEdit && (
-                <div id="bg-edit" onClick={() => setShowEdit(false)}>
-                    <div id="container-edit" onClick={(e) => e.stopPropagation()}>
+                <div id="bg-edit-cliente" onClick={() => setShowEdit(false)}>
+                    <div id="container-edit-cliente" onClick={(e) => e.stopPropagation()}>
 
-                        <button id="close-btn-edit" onClick={() => setShowEdit(false)}>
-                            ✕
-                        </button>
-
-                        <h1>Editar Cliente</h1>
+                        <div id="header-modal-edit">
+                            <h1>Editar Cliente</h1>
+                            <button id="close-btn-edit" onClick={() => setShowEdit(false)}>
+                                ✕
+                            </button>
+                        </div>
 
                         <section>
                             <label>Nome:</label>
@@ -275,6 +279,16 @@ export default function FiadoCliente() {
                             />
                         </section>
 
+                        <section>
+                            <label>Observações:</label>
+                            <textarea
+                                placeholder="Anote aqui informações sobre o cliente"
+                                rows={4}
+                                value={observacaoEdit}
+                                onChange={(e) => setObservacaoEdit(e.target.value)}
+                            />
+                        </section>
+
                         <section style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
                             <button onClick={salvarEdicaoCliente}>Salvar</button>
                             <button onClick={deletarCliente}>Deletar</button>
@@ -297,11 +311,14 @@ export default function FiadoCliente() {
                             <p className="info-secundaria">CPF: {cliente.cpf}</p>
                             <p className="info-secundaria">Endereço: {cliente.endereco}</p>
                             <p className="info-secundaria">Telefone: {cliente.telefone}</p>
+                            {cliente.observacao && (
+                                <p className="info-secundaria observacao-texto">Observação: {cliente.observacao}</p>
+                            )}
                         </div>
                         <div id="divida-area">
                             <span>Dívida atual</span>
                             <strong style={{ color: Number(cliente.divida) > 0 ? "#c0392b" : "#27ae60" }}>
-                                R$ {Number(cliente.divida).toFixed(2)}
+                                R$ {Number(cliente.divida).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </strong>
                             <button onClick={abrirEdicao}>Gerenciar cliente</button>
                         </div>
@@ -332,7 +349,7 @@ export default function FiadoCliente() {
                             pagamentos.map((pagamento) => (
                                 <div key={pagamento.id} className="linha-pagamento">
                                     <span>{new Date(pagamento.data).toLocaleDateString("pt-BR")}</span>
-                                    <span className="valor-pago">R$ {Number(pagamento.valor).toFixed(2)}</span>
+                                    <span className="valor-pago">R$ {Number(pagamento.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                             ))
                         )}
@@ -352,11 +369,11 @@ export default function FiadoCliente() {
                                     {venda.itens.map((item) => (
                                         <div key={item.id} className="item-venda">
                                             <span>{item.quantidade}x {item.produto.nome}</span>
-                                            <span>R$ {item.preco.toFixed(2)}</span>
+                                            <span>R$ {item.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                     ))}
                                     <div className="total-venda">
-                                        Total: R$ {Number(venda.total).toFixed(2)}
+                                        Total: R$ {Number(venda.total).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </div>
                                 </div>
                             ))

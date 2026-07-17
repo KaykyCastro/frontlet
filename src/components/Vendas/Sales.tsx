@@ -135,72 +135,90 @@ export default function Sales() {
         }
     }
 
-    const inserirDebito = async () => {
-        if (!usuarioSelecionado) {
-            return alert("Selecione um cliente antes de inserir débito.")
-        }
-
-        if (cart.length === 0) {
-            return alert("Carrinho vazio!")
-        }
-
-        if (!confirm(`Inserir débito de R$ ${calculaTotal().toFixed(2)} para ${usuarioSelecionado.nome}?`)) return
-
-        try {
-            const subtotalCarrinho = cart.reduce(
-                (acc, item) => acc + item.preco * item.quantidade,
-                0
-            )
-
-            const itensComDesconto = cart.map((item) => {
-                let precoFinal = Number(item.preco)
-
-                if (desconto.tipo === "valor" && desconto.valor > 0) {
-                    const subtotalItem = precoFinal * item.quantidade
-                    const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
-                    precoFinal = precoFinal - descontoProporcional / item.estoque
-                } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
-                    precoFinal = precoFinal * (1 - desconto.valor / 100)
-                }
-
-                return {
-                    id: item.id,
-                    quantidade: item.quantidade,
-                    preco: Number(precoFinal.toFixed(2)),
-                }
-            })
-
-            const body = {
-                itens: itensComDesconto,
-                usuarioId: usuarioSelecionado.id,
-                metodoPag: metodoPagamento || "FIADO",
-            }
-
-            const response = await fetch("http://localhost:3000/vendas", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-            })
-
-            if (!response.ok) {
-                const text = await response.text()
-                throw new Error(text)
-            }
-
-            setCart([])
-            setDesconto({ tipo: "valor", valor: 0 })
-            setDescontoInput("")
-            setUsuarioSelecionado(undefined)
-            setMetodoPagamento("")
-            buscarProdutos()
-
-            alert(`Débito inserido com sucesso para ${usuarioSelecionado.nome}!`)
-        } catch (err) {
-            const error = err as Error
-            console.error("Erro ao inserir débito:", error.message)
-            alert(error.message)
-        }
+  const inserirDebito = async () => {
+    if (!usuarioSelecionado) {
+        return alert("Selecione um cliente antes de inserir débito.")
     }
+
+    if (cart.length === 0) {
+        return alert("Carrinho vazio!")
+    }
+
+    if (!confirm(`Inserir débito de R$ ${calculaTotal().toFixed(2)} para ${usuarioSelecionado.nome}?`)) return
+
+    try {
+        const subtotalCarrinho = cart.reduce(
+            (acc, item) => acc + item.preco * item.quantidade,
+            0
+        )
+
+        const itensComDesconto = cart.map((item) => {
+            let precoFinal = Number(item.preco)
+
+            if (desconto.tipo === "valor" && desconto.valor > 0) {
+                const subtotalItem = precoFinal * item.quantidade
+                const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
+                precoFinal = precoFinal - descontoProporcional / item.estoque
+            } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
+                precoFinal = precoFinal * (1 - desconto.valor / 100)
+            }
+
+            return {
+                id: item.id,
+                quantidade: item.quantidade,
+                preco: Number(precoFinal.toFixed(2)),
+            }
+        })
+
+        const body = {
+            itens: itensComDesconto,
+            usuarioId: usuarioSelecionado.id,
+            metodoPag: "FIADO",
+        }
+
+        const response = await fetch("http://localhost:3000/vendas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        })
+
+        if (!response.ok) {
+            const text = await response.text()
+            throw new Error(text)
+        }
+
+        // BUSCA O CLIENTE ATUALIZADO (com a dívida já somada pelo backend)
+        const resUsuarios = await fetch("http://localhost:3000/usuarios")
+        const usuariosAtualizados: User[] = await resUsuarios.json()
+        const clienteAtualizado = usuariosAtualizados.find(u => u.id === usuarioSelecionado.id)
+
+        const dataAtual = new Date().toLocaleDateString('pt-BR')
+        const totalComDesconto = calculaTotal()
+
+        setCliente(clienteAtualizado ?? usuarioSelecionado)
+        setItens(cart)
+        setTotalItens(cart.length)
+        setTotalSemDesconto(subtotal)
+        setTotalFinal(totalComDesconto)
+        setDescontoNota(desconto.valor)
+        setData(String(dataAtual))
+        setShowNote(true)
+
+        setCart([])
+        setDesconto({ tipo: "valor", valor: 0 })
+        setDescontoInput("")
+        setUsuarioSelecionado(undefined)
+        setMetodoPagamento("")
+        buscarProdutos()
+        buscarClientes()
+
+        alert(`Débito inserido com sucesso para ${usuarioSelecionado.nome}!`)
+    } catch (err) {
+        const error = err as Error
+        console.error("Erro ao inserir débito:", error.message)
+        alert(error.message)
+    }
+}
 
     async function buscarClientes() {
         const response = await fetch("http://localhost:3000/usuarios")

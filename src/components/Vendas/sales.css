@@ -140,12 +140,28 @@
     background-color: rgb(37, 185, 37);
 }
 
-#data-sale{
+#data-sale {
     display: flex;
     flex-direction: row;
     align-items: center;
     width: 90%;
     gap: 10px;
+    flex-wrap: wrap;
+}
+
+#clientes-select {
+    color: black;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+#clientes-select select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 #data-sale #box-desconto {
