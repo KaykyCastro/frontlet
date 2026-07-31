@@ -88,7 +88,7 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
       // FORMATAR ITENS
       // Formatar itens (sem caractere combinante — não funciona em ESC/POS)
       const itensTexto = itens.map((item) => {
-        const linhasNome = quebrarTexto(item.nome, 28)
+        const linhasNome = quebrarTexto(item.nome, 24) // nome um pouco mais estreito
 
         const qtd = `${item.quantidade}x`.padStart(6, " ")
 
@@ -103,18 +103,17 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
           .toFixed(2)
           .padStart(10, " ")
 
-        // Se tiver desconto, a primeira linha mostra "De: R$ X" (valor original).
-        // A linha de baixo mostra "Por: R$ Y" (valor atual).
+        // Coluna do valor mais larga (14) pra caber "De: R$ 10.00" com folga
         const valor = temDesconto
-          ? `De: R$ ${precoOriginalTexto}`.padStart(10, " ")
-          : precoAtualTexto.padStart(10, " ")
+          ? `De: R$ ${precoOriginalTexto}`.padStart(14, " ")
+          : precoAtualTexto.padStart(14, " ")
 
         let texto = ""
 
         linhasNome.forEach((linhaNome, index) => {
           if (index === 0) {
             texto +=
-              linhaNome.padEnd(34, " ") +
+              linhaNome.padEnd(30, " ") +
               qtd +
               valor +
               total +
@@ -126,7 +125,7 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
 
         // Linha de baixo: "Por: R$ X" com o preço atual
         if (temDesconto) {
-          const espacosIniciais = " ".repeat(34 + 6)
+          const espacosIniciais = " ".repeat(30 + 6)
           texto += espacosIniciais + `Por: R$ ${precoAtualTexto}\n`
         }
 
