@@ -58,11 +58,13 @@ const imprimirCupom = async () => {
 
       const linha = "-".repeat(60);
 
-      // LARGURAS DAS COLUNAS DO CUPOM (soma = 60, igual à largura da "linha")
-      const LARGURA_NOME = 30;
-      const LARGURA_QTD = 6;
-      const LARGURA_VALOR = 14;
-      const LARGURA_TOTAL = 10;
+      // LARGURAS DAS COLUNAS + espaço fixo entre elas (garante separação
+      // visual independente de alinhamento à esquerda ou à direita)
+      const LARGURA_NOME = 28;
+      const LARGURA_QTD = 5;
+      const LARGURA_VALOR = 13;
+      const LARGURA_TOTAL = 9;
+      const GAP = " "; // espaço entre QTD-VALOR e entre VALOR-TOTAL
 
       // FUNÇÃO PARA QUEBRAR TEXTO
       const quebrarTexto = (texto, tamanho) => {
@@ -87,17 +89,19 @@ const imprimirCupom = async () => {
         return linhas;
       };
 
-      // CABEÇALHO DA TABELA — VALOR alinhado à esquerda, igual à coluna de itens
+      // CABEÇALHO DA TABELA — mesmas larguras + gaps da linha de itens
       const cabecalhoItens =
         "PRODUTO".padEnd(LARGURA_NOME, " ") +
         "QTD".padStart(LARGURA_QTD, " ") +
+        GAP +
         "VALOR".padEnd(LARGURA_VALOR, " ") +
+        GAP +
         "TOTAL".padStart(LARGURA_TOTAL, " ") +
         "\n";
 
       // FORMATAR ITENS (sem caractere combinante — não funciona em ESC/POS)
       const itensTexto = itens.map((item) => {
-        const linhasNome = quebrarTexto(item.nome, LARGURA_NOME - 6)
+        const linhasNome = quebrarTexto(item.nome, LARGURA_NOME - 4)
 
         const qtd = `${item.quantidade}x`.padStart(LARGURA_QTD, " ")
 
@@ -124,7 +128,9 @@ const imprimirCupom = async () => {
             texto +=
               linhaNome.padEnd(LARGURA_NOME, " ") +
               qtd +
+              GAP +
               valor +
+              GAP +
               total +
               "\n"
           } else {
@@ -132,9 +138,9 @@ const imprimirCupom = async () => {
           }
         })
 
-        // Linha de baixo: "Por: R$ X" com o preço atual
+        // Linha de baixo: "Por: R$ X", alinhada exatamente onde começa a coluna VALOR
         if (temDesconto) {
-          const espacosIniciais = " ".repeat(LARGURA_NOME + LARGURA_QTD)
+          const espacosIniciais = " ".repeat(LARGURA_NOME + LARGURA_QTD) + GAP
           texto += espacosIniciais + `Por: R$ ${precoAtualTexto}\n`
         }
 
