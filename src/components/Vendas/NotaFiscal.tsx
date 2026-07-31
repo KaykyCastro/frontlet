@@ -64,7 +64,7 @@ const imprimirCupom = async () => {
       const LARGURA_QTD = 5;
       const LARGURA_VALOR = 13;
       const LARGURA_TOTAL = 9;
-      const GAP = " "; // espaço entre QTD-VALOR e entre VALOR-TOTAL
+      const GAP = "   "; // espaço entre QTD-VALOR e entre VALOR-TOTAL
 
       // FUNÇÃO PARA QUEBRAR TEXTO
       const quebrarTexto = (texto, tamanho) => {
