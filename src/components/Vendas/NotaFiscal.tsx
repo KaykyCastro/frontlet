@@ -47,7 +47,7 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
     });
   };
 
-  const imprimirCupom = async () => {
+const imprimirCupom = async () => {
     try {
       await initQZ();
 
@@ -87,11 +87,11 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
         return linhas;
       };
 
-      // CABEÇALHO DA TABELA — usa as mesmas larguras das colunas dos itens
+      // CABEÇALHO DA TABELA — VALOR alinhado à esquerda, igual à coluna de itens
       const cabecalhoItens =
         "PRODUTO".padEnd(LARGURA_NOME, " ") +
         "QTD".padStart(LARGURA_QTD, " ") +
-        "VALOR".padStart(LARGURA_VALOR, " ") +
+        "VALOR".padEnd(LARGURA_VALOR, " ") +
         "TOTAL".padStart(LARGURA_TOTAL, " ") +
         "\n";
 
@@ -112,11 +112,10 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
           .toFixed(2)
           .padStart(LARGURA_TOTAL, " ")
 
-        // Se tiver desconto, a primeira linha mostra "De: R$ X" (valor original),
-        // alinhado à ESQUERDA pra bater com o "Por:" da linha de baixo.
+        // Coluna de valor sempre alinhada à esquerda, com ou sem desconto
         const valor = temDesconto
           ? `De: R$ ${precoOriginalTexto}`.padEnd(LARGURA_VALOR, " ")
-          : precoAtualTexto.padStart(LARGURA_VALOR, " ")
+          : precoAtualTexto.padEnd(LARGURA_VALOR, " ")
 
         let texto = ""
 
