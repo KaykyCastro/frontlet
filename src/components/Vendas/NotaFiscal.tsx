@@ -96,12 +96,18 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
           item.precoOriginal !== undefined &&
           item.precoOriginal !== item.preco
 
+        const precoOriginalTexto = item.precoOriginal?.toFixed(2) ?? ""
         const precoAtualTexto = item.preco.toFixed(2)
-        const precoAtualPadded = precoAtualTexto.padStart(10, " ")
 
         const total = (item.preco * item.quantidade)
           .toFixed(2)
           .padStart(10, " ")
+
+        // Se tiver desconto, a primeira linha mostra "De: R$ X" (valor original).
+        // A linha de baixo mostra "Por: R$ Y" (valor atual).
+        const valor = temDesconto
+          ? `De: R$ ${precoOriginalTexto}`.padStart(10, " ")
+          : precoAtualTexto.padStart(10, " ")
 
         let texto = ""
 
@@ -110,7 +116,7 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
             texto +=
               linhaNome.padEnd(34, " ") +
               qtd +
-              precoAtualPadded +
+              valor +
               total +
               "\n"
           } else {
@@ -118,10 +124,10 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
           }
         })
 
-        // Preço original vira uma linha de texto normal, sem tachado
+        // Linha de baixo: "Por: R$ X" com o preço atual
         if (temDesconto) {
           const espacosIniciais = " ".repeat(34 + 6)
-          texto += espacosIniciais + `(De: R$ ${item.precoOriginal.toFixed(2)})\n`
+          texto += espacosIniciais + `Por: R$ ${precoAtualTexto}\n`
         }
 
         return texto
