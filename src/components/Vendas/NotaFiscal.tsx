@@ -86,8 +86,8 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
       const riscar = (texto) => texto.split("").map((c) => c + "\u0336").join("")
 
       // FORMATAR ITENS
+      // Formatar itens (sem caractere combinante — não funciona em ESC/POS)
       const itensTexto = itens.map((item) => {
-        // TAMANHO MÁXIMO DO NOME
         const linhasNome = quebrarTexto(item.nome, 28)
 
         const qtd = `${item.quantidade}x`.padStart(6, " ")
@@ -96,40 +96,32 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
           item.precoOriginal !== undefined &&
           item.precoOriginal !== item.preco
 
-        const precoOriginalTexto = item.precoOriginal?.toFixed(2) ?? ""
         const precoAtualTexto = item.preco.toFixed(2)
+        const precoAtualPadded = precoAtualTexto.padStart(10, " ")
 
         const total = (item.preco * item.quantidade)
           .toFixed(2)
           .padStart(10, " ")
 
-        // Se tiver desconto, a primeira linha mostra o preço ORIGINAL riscado.
-        // O preço atual vai numa segunda linha, logo abaixo (mesma coluna "Valor").
-        const valor = temDesconto
-          ? " ".repeat(Math.max(0, 10 - precoOriginalTexto.length)) + riscar(precoOriginalTexto)
-          : precoAtualTexto.padStart(10, " ")
-
         let texto = ""
 
         linhasNome.forEach((linhaNome, index) => {
-          // PRIMEIRA LINHA MOSTRA TUDO
           if (index === 0) {
             texto +=
               linhaNome.padEnd(34, " ") +
               qtd +
-              valor +
+              precoAtualPadded +
               total +
               "\n"
           } else {
-            // RESTANTE MOSTRA SÓ O NOME
             texto += linhaNome + "\n"
           }
         })
 
-        // SEGUNDA LINHA: preço atual, alinhado embaixo do preço original riscado
+        // Preço original vira uma linha de texto normal, sem tachado
         if (temDesconto) {
-          const espacosIniciais = " ".repeat(34 + 6) // mesma largura de nome + qtd
-          texto += espacosIniciais + precoAtualTexto.padStart(10, " ") + "\n"
+          const espacosIniciais = " ".repeat(34 + 6)
+          texto += espacosIniciais + `(De: R$ ${item.precoOriginal.toFixed(2)})\n`
         }
 
         return texto
