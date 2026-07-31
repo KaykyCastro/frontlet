@@ -58,6 +58,12 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
 
       const linha = "-".repeat(60);
 
+      // LARGURAS DAS COLUNAS DO CUPOM (soma = 60, igual à largura da "linha")
+      const LARGURA_NOME = 30;
+      const LARGURA_QTD = 6;
+      const LARGURA_VALOR = 14;
+      const LARGURA_TOTAL = 10;
+
       // FUNÇÃO PARA QUEBRAR TEXTO
       const quebrarTexto = (texto, tamanho) => {
         const palavras = texto.split(" ");
@@ -81,16 +87,20 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
         return linhas;
       };
 
-      // FORMATAR ITENS
-      // Função auxiliar: aplica "risco" em cada caractere do texto
-      const riscar = (texto) => texto.split("").map((c) => c + "\u0336").join("")
+      // CABEÇALHO DA TABELA — usa as mesmas larguras das colunas dos itens,
+      // assim tudo fica alinhado na mesma linha
+      const cabecalhoItens =
+        "PRODUTO".padEnd(LARGURA_NOME, " ") +
+        "QTD".padStart(LARGURA_QTD, " ") +
+        "VALOR".padStart(LARGURA_VALOR, " ") +
+        "TOTAL".padStart(LARGURA_TOTAL, " ") +
+        "\n";
 
-      // FORMATAR ITENS
-      // Formatar itens (sem caractere combinante — não funciona em ESC/POS)
+      // FORMATAR ITENS (sem caractere combinante — não funciona em ESC/POS)
       const itensTexto = itens.map((item) => {
-        const linhasNome = quebrarTexto(item.nome, 24) // nome um pouco mais estreito
+        const linhasNome = quebrarTexto(item.nome, LARGURA_NOME - 6) // margem pra não colar no QTD
 
-        const qtd = `${item.quantidade}x`.padStart(6, " ")
+        const qtd = `${item.quantidade}x`.padStart(LARGURA_QTD, " ")
 
         const temDesconto =
           item.precoOriginal !== undefined &&
@@ -101,19 +111,20 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
 
         const total = (item.preco * item.quantidade)
           .toFixed(2)
-          .padStart(10, " ")
+          .padStart(LARGURA_TOTAL, " ")
 
-        // Coluna do valor mais larga (14) pra caber "De: R$ 10.00" com folga
+        // Se tiver desconto, a primeira linha mostra "De: R$ X" (valor original).
+        // A linha de baixo mostra "Por: R$ Y" (valor atual).
         const valor = temDesconto
-          ? `De: R$ ${precoOriginalTexto}`.padStart(14, " ")
-          : precoAtualTexto.padStart(14, " ")
+          ? `De: R$ ${precoOriginalTexto}`.padStart(LARGURA_VALOR, " ")
+          : precoAtualTexto.padStart(LARGURA_VALOR, " ")
 
         let texto = ""
 
         linhasNome.forEach((linhaNome, index) => {
           if (index === 0) {
             texto +=
-              linhaNome.padEnd(30, " ") +
+              linhaNome.padEnd(LARGURA_NOME, " ") +
               qtd +
               valor +
               total +
@@ -125,7 +136,7 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
 
         // Linha de baixo: "Por: R$ X" com o preço atual
         if (temDesconto) {
-          const espacosIniciais = " ".repeat(30 + 6)
+          const espacosIniciais = " ".repeat(LARGURA_NOME + LARGURA_QTD)
           texto += espacosIniciais + `Por: R$ ${precoAtualTexto}\n`
         }
 
@@ -209,7 +220,7 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
         // ITENS
         "\x1B\x61\x00",
 
-        "PRODUTO                                QTD    VALOR    TOTAL\n",
+        cabecalhoItens,
 
         linha + "\n",
 
