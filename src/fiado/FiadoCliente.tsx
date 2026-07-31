@@ -51,6 +51,12 @@ export default function FiadoCliente() {
     //Registrar pagamento
     const [valorPagamento, setValorPagamento] = useState("")
 
+    //Edição de venda (data, produtos, exclusão)
+    const [editingVenda, setEditingVenda] = useState<Venda | null>(null)
+    const [dataEdit, setDataEdit] = useState("")
+    const [itensEdit, setItensEdit] = useState<{ id: number; produtoId: number; nome: string; quantidade: number; preco: number }[]
+    >([])
+
     useEffect(() => {
         // Se a página foi recarregada (F5), o state do React Router se perde.
         // Sem id na URL, não há como buscar o cliente de novo — volta pra lista.
@@ -221,6 +227,140 @@ export default function FiadoCliente() {
         }
     }
 
+    // ---------------- Edição / exclusão de venda ----------------
+
+    // Converte uma data ISO (vinda do backend) para "dd/mm/aaaa" usando o
+    // horário local, evitando o bug de fuso do toISOString()
+    function paraDataBR(dataISO: string) {
+        const d = new Date(dataISO)
+        const dia = String(d.getUTCDate()).padStart(2, "0")
+        const mes = String(d.getUTCMonth() + 1).padStart(2, "0")
+        const ano = d.getUTCFullYear()
+        return `${dia}/${mes}/${ano}`
+    }
+
+    // Máscara: digita e formata como "31/07/2026", igual ao mask de valor
+    function formatarDataDigitada(input: string) {
+        const digitos = input.replace(/\D/g, "").slice(0, 8)
+
+        if (!digitos) return ""
+
+        const dia = digitos.slice(0, 2)
+        const mes = digitos.slice(2, 4)
+        const ano = digitos.slice(4, 8)
+
+        let resultado = dia
+        if (digitos.length > 2) resultado += "/" + mes
+        if (digitos.length > 4) resultado += "/" + ano
+
+        return resultado
+    }
+
+    function handleDataEditChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setDataEdit(formatarDataDigitada(e.target.value))
+    }
+
+    // Converte "31/07/2026" de volta para "2026-07-31" (formato que o backend espera)
+    function dataBRParaISO(dataBR: string) {
+        const [dia, mes, ano] = dataBR.split("/")
+        if (!dia || !mes || !ano || ano.length < 4) return null
+        return `${ano}-${mes}-${dia}`
+    }
+
+    function abrirEdicaoVenda(venda: Venda) {
+        setEditingVenda(venda)
+        setDataEdit(paraDataBR(venda.data))
+        setItensEdit(venda.itens.map((item) => ({
+            id: item.id,
+            produtoId: item.produto.id,
+            nome: item.produto.nome,
+            quantidade: item.quantidade,
+            preco: item.preco,
+        })))
+    }
+
+    function alterarQuantidadeItem(id: number, quantidade: number) {
+        setItensEdit((prev) => prev.map((item) => (item.id === id ? { ...item, quantidade } : item)))
+    }
+
+    function alterarPrecoItem(id: number, preco: number) {
+        setItensEdit((prev) => prev.map((item) => (item.id === id ? { ...item, preco } : item)))
+    }
+
+    function removerItem(id: number) {
+        setItensEdit((prev) => prev.filter((item) => item.id !== id))
+    }
+
+    const totalEdit = itensEdit.reduce((soma, item) => soma + item.quantidade * item.preco, 0)
+
+    async function salvarEdicaoVenda() {
+        if (!editingVenda || !cliente) return
+
+        if (itensEdit.length === 0) {
+            return alert("A venda precisa ter ao menos um produto")
+        }
+
+        const dataISO = dataBRParaISO(dataEdit)
+
+        if (!dataISO) {
+            return alert("Insira uma data válida (dd/mm/aaaa)")
+        }
+
+        try {
+            const res = await fetch(`http://localhost:3000/vendas/${editingVenda.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    data: dataISO,
+                    itens: itensEdit.map((item) => ({
+                        produtoId: item.produtoId,
+                        quantidade: item.quantidade,
+                        preco: item.preco,
+                    })),
+                }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                alert(data.error || "Erro ao editar venda")
+                return
+            }
+
+            setEditingVenda(null)
+            await buscarVendas(cliente.id)
+            await atualizarCliente(cliente.id)
+        } catch (error) {
+            console.error("Erro ao editar venda:", error)
+            alert("Erro de conexão com o servidor")
+        }
+    }
+
+    async function excluirVenda() {
+        if (!editingVenda || !cliente) return
+
+        if (!confirm("Tem certeza que deseja excluir esta compra? O estoque e a dívida serão ajustados.")) return
+
+        try {
+            const res = await fetch(`http://localhost:3000/vendas/${editingVenda.id}`, {
+                method: "DELETE",
+            })
+
+            if (!res.ok) {
+                const data = await res.json()
+                alert(data.error || "Erro ao excluir venda")
+                return
+            }
+
+            setEditingVenda(null)
+            await buscarVendas(cliente.id)
+            await atualizarCliente(cliente.id)
+        } catch (error) {
+            console.error("Erro ao excluir venda:", error)
+            alert("Erro de conexão com o servidor")
+        }
+    }
+
     if (!cliente) return null
 
     return (
@@ -298,6 +438,69 @@ export default function FiadoCliente() {
                 </div>
             )}
 
+            {editingVenda && (
+                <div id="bg-edit-cliente" onClick={() => setEditingVenda(null)}>
+                    <div id="container-edit-cliente" onClick={(e) => e.stopPropagation()}>
+
+                        <div id="header-modal-edit">
+                            <h1>Editar compra #{editingVenda.id}</h1>
+                            <button id="close-btn-edit-cliente" onClick={() => setEditingVenda(null)}>
+                                ✕
+                            </button>
+                        </div>
+
+                        <section>
+                            <label>Data da compra:</label>
+                            <input
+                                placeholder="dd/mm/aaaa"
+                                inputMode="numeric"
+                                value={dataEdit}
+                                onChange={handleDataEditChange}
+                            />
+                        </section>
+
+                        <section>
+                            <label>Produtos:</label>
+                            {itensEdit.map((item) => (
+                                <div
+                                    key={item.id}
+                                    style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}
+                                >
+                                    <span style={{ flex: 1 }}>{item.nome}</span>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={item.quantidade}
+                                        onChange={(e) => alterarQuantidadeItem(item.id, Number(e.target.value))}
+                                        style={{ width: "60px" }}
+                                    />
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        step="0.01"
+                                        value={item.preco}
+                                        onChange={(e) => alterarPrecoItem(item.id, Number(e.target.value))}
+                                        style={{ width: "80px" }}
+                                    />
+                                    <button type="button" onClick={() => removerItem(item.id)}>✕</button>
+                                </div>
+                            ))}
+                        </section>
+
+                        <p>
+                            <strong>Novo total:</strong> R${" "}
+                            {totalEdit.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+
+                        <section style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+                            <button onClick={salvarEdicaoVenda}>Salvar</button>
+                            <button onClick={excluirVenda}>Excluir compra</button>
+                        </section>
+
+                    </div>
+                </div>
+            )}
+
             <button onClick={handleGoBack} id="goback-btn">
                 <ArrowLeftIcon size={20} weight="bold" color="#e69216" />
             </button>
@@ -364,7 +567,8 @@ export default function FiadoCliente() {
                                 <div key={venda.id} className="card-venda">
                                     <div className="header-venda">
                                         <span>Venda #{venda.id}</span>
-                                        <span>{new Date(venda.data).toLocaleDateString("pt-BR")}</span>
+                                        <span>{paraDataBR(venda.data)}</span>
+                                        <button onClick={() => abrirEdicaoVenda(venda)}>Editar</button>
                                     </div>
                                     {venda.itens.map((item) => (
                                         <div key={item.id} className="item-venda">

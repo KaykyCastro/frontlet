@@ -82,29 +82,34 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
       };
 
       // FORMATAR ITENS
+      // Função auxiliar: aplica "risco" em cada caractere do texto
+      const riscar = (texto) => texto.split("").map((c) => c + "\u0336").join("")
+
+      // FORMATAR ITENS
       const itensTexto = itens.map((item) => {
         // TAMANHO MÁXIMO DO NOME
-        const linhasNome = quebrarTexto(item.nome, 28);
+        const linhasNome = quebrarTexto(item.nome, 28)
 
-        const qtd = `${item.quantidade}x`.padStart(6, " ");
+        const qtd = `${item.quantidade}x`.padStart(6, " ")
 
-        // VERIFICA SE TEM DESCONTO NO ITEM
         const temDesconto =
           item.precoOriginal !== undefined &&
-          item.precoOriginal !== item.preco;
+          item.precoOriginal !== item.preco
 
-        // SE TIVER DESCONTO, MOSTRA OS DOIS VALORES SEM SETA
-        // (impressora térmica não suporta tachado de forma universal via ESC/POS,
-        // então aqui vão os dois preços lado a lado)
-        const valor = temDesconto
-          ? `${item.precoOriginal.toFixed(2)} ${item.preco.toFixed(2)}`.padStart(10, " ")
-          : item.preco.toFixed(2).padStart(10, " ");
+        const precoOriginalTexto = item.precoOriginal?.toFixed(2) ?? ""
+        const precoAtualTexto = item.preco.toFixed(2)
 
         const total = (item.preco * item.quantidade)
           .toFixed(2)
-          .padStart(10, " ");
+          .padStart(10, " ")
 
-        let texto = "";
+        // Se tiver desconto, a primeira linha mostra o preço ORIGINAL riscado.
+        // O preço atual vai numa segunda linha, logo abaixo (mesma coluna "Valor").
+        const valor = temDesconto
+          ? " ".repeat(Math.max(0, 10 - precoOriginalTexto.length)) + riscar(precoOriginalTexto)
+          : precoAtualTexto.padStart(10, " ")
+
+        let texto = ""
 
         linhasNome.forEach((linhaNome, index) => {
           // PRIMEIRA LINHA MOSTRA TUDO
@@ -114,14 +119,20 @@ export default function NotaFiscal({ cliente, itens, totalItens, totalSemDescont
               qtd +
               valor +
               total +
-              "\n";
+              "\n"
           } else {
             // RESTANTE MOSTRA SÓ O NOME
-            texto += linhaNome + "\n";
+            texto += linhaNome + "\n"
           }
-        });
+        })
 
-        return texto;
+        // SEGUNDA LINHA: preço atual, alinhado embaixo do preço original riscado
+        if (temDesconto) {
+          const espacosIniciais = " ".repeat(34 + 6) // mesma largura de nome + qtd
+          texto += espacosIniciais + precoAtualTexto.padStart(10, " ") + "\n"
+        }
+
+        return texto
       });
 
       const cupom = [

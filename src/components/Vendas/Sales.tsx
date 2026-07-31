@@ -36,7 +36,13 @@ export default function Sales() {
 
     //Produto selecionados
     const [productSelected, SetProductSelected] = useState<Produto>()
-    const [cart, setCart] = useState<CartItem[]>([])
+
+    //Carrinho — inicializa lendo do localStorage (persistência ao atualizar a tela)
+    const [cart, setCart] = useState<CartItem[]>(() => {
+        const salvo = localStorage.getItem("cart")
+        return salvo ? JSON.parse(salvo) : []
+    })
+
     const [metodoPagamento, setMetodoPagamento] = useState("")
 
     //Listagem
@@ -50,6 +56,11 @@ export default function Sales() {
     const [statusFilter, setStatusFilter] = useState("")
 
     const metodoPag = ["DINHEIRO", "PIX", "CARTAO_DEBITO", "CARTAO_CREDITO"]
+
+    // Salva o carrinho no localStorage sempre que ele mudar
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(cart))
+    }, [cart])
 
     function handleGoBack() {
         navigate("/")
@@ -135,90 +146,90 @@ export default function Sales() {
         }
     }
 
-  const inserirDebito = async () => {
-    if (!usuarioSelecionado) {
-        return alert("Selecione um cliente antes de inserir débito.")
-    }
-
-    if (cart.length === 0) {
-        return alert("Carrinho vazio!")
-    }
-
-    if (!confirm(`Inserir débito de R$ ${calculaTotal().toFixed(2)} para ${usuarioSelecionado.nome}?`)) return
-
-    try {
-        const subtotalCarrinho = cart.reduce(
-            (acc, item) => acc + item.preco * item.quantidade,
-            0
-        )
-
-        const itensComDesconto = cart.map((item) => {
-            let precoFinal = Number(item.preco)
-
-            if (desconto.tipo === "valor" && desconto.valor > 0) {
-                const subtotalItem = precoFinal * item.quantidade
-                const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
-                precoFinal = precoFinal - descontoProporcional / item.estoque
-            } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
-                precoFinal = precoFinal * (1 - desconto.valor / 100)
-            }
-
-            return {
-                id: item.id,
-                quantidade: item.quantidade,
-                preco: Number(precoFinal.toFixed(2)),
-            }
-        })
-
-        const body = {
-            itens: itensComDesconto,
-            usuarioId: usuarioSelecionado.id,
-            metodoPag: "FIADO",
+    const inserirDebito = async () => {
+        if (!usuarioSelecionado) {
+            return alert("Selecione um cliente antes de inserir débito.")
         }
 
-        const response = await fetch("http://localhost:3000/vendas", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        })
-
-        if (!response.ok) {
-            const text = await response.text()
-            throw new Error(text)
+        if (cart.length === 0) {
+            return alert("Carrinho vazio!")
         }
 
-        // BUSCA O CLIENTE ATUALIZADO (com a dívida já somada pelo backend)
-        const resUsuarios = await fetch("http://localhost:3000/usuarios")
-        const usuariosAtualizados: User[] = await resUsuarios.json()
-        const clienteAtualizado = usuariosAtualizados.find(u => u.id === usuarioSelecionado.id)
+        if (!confirm(`Inserir débito de R$ ${calculaTotal().toFixed(2)} para ${usuarioSelecionado.nome}?`)) return
 
-        const dataAtual = new Date().toLocaleDateString('pt-BR')
-        const totalComDesconto = calculaTotal()
+        try {
+            const subtotalCarrinho = cart.reduce(
+                (acc, item) => acc + item.preco * item.quantidade,
+                0
+            )
 
-        setCliente(clienteAtualizado ?? usuarioSelecionado)
-        setItens(cart)
-        setTotalItens(cart.length)
-        setTotalSemDesconto(subtotal)
-        setTotalFinal(totalComDesconto)
-        setDescontoNota(desconto.valor)
-        setData(String(dataAtual))
-        setShowNote(true)
+            const itensComDesconto = cart.map((item) => {
+                let precoFinal = Number(item.preco)
 
-        setCart([])
-        setDesconto({ tipo: "valor", valor: 0 })
-        setDescontoInput("")
-        setUsuarioSelecionado(undefined)
-        setMetodoPagamento("")
-        buscarProdutos()
-        buscarClientes()
+                if (desconto.tipo === "valor" && desconto.valor > 0) {
+                    const subtotalItem = precoFinal * item.quantidade
+                    const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
+                    precoFinal = precoFinal - descontoProporcional / item.estoque
+                } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
+                    precoFinal = precoFinal * (1 - desconto.valor / 100)
+                }
 
-        alert(`Débito inserido com sucesso para ${usuarioSelecionado.nome}!`)
-    } catch (err) {
-        const error = err as Error
-        console.error("Erro ao inserir débito:", error.message)
-        alert(error.message)
+                return {
+                    id: item.id,
+                    quantidade: item.quantidade,
+                    preco: Number(precoFinal.toFixed(2)),
+                }
+            })
+
+            const body = {
+                itens: itensComDesconto,
+                usuarioId: usuarioSelecionado.id,
+                metodoPag: "FIADO",
+            }
+
+            const response = await fetch("http://localhost:3000/vendas", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            })
+
+            if (!response.ok) {
+                const text = await response.text()
+                throw new Error(text)
+            }
+
+            // BUSCA O CLIENTE ATUALIZADO (com a dívida já somada pelo backend)
+            const resUsuarios = await fetch("http://localhost:3000/usuarios")
+            const usuariosAtualizados: User[] = await resUsuarios.json()
+            const clienteAtualizado = usuariosAtualizados.find(u => u.id === usuarioSelecionado.id)
+
+            const dataAtual = new Date().toLocaleDateString('pt-BR')
+            const totalComDesconto = calculaTotal()
+
+            setCliente(clienteAtualizado ?? usuarioSelecionado)
+            setItens(cart)
+            setTotalItens(cart.length)
+            setTotalSemDesconto(subtotal)
+            setTotalFinal(totalComDesconto)
+            setDescontoNota(desconto.valor)
+            setData(String(dataAtual))
+            setShowNote(true)
+
+            setCart([])
+            setDesconto({ tipo: "valor", valor: 0 })
+            setDescontoInput("")
+            setUsuarioSelecionado(undefined)
+            setMetodoPagamento("")
+            buscarProdutos()
+            buscarClientes()
+
+            alert(`Débito inserido com sucesso para ${usuarioSelecionado.nome}!`)
+        } catch (err) {
+            const error = err as Error
+            console.error("Erro ao inserir débito:", error.message)
+            alert(error.message)
+        }
     }
-}
 
     async function buscarClientes() {
         const response = await fetch("http://localhost:3000/usuarios")
@@ -230,6 +241,7 @@ export default function Sales() {
         const response = await fetch("http://localhost:3000/produtos")
         const data = await response.json()
         setProducts(data)
+        sincronizarCarrinhoComProdutos(data)
     }
 
     async function buscarCategorias() {
@@ -242,6 +254,45 @@ export default function Sales() {
         await buscarClientes()
         await buscarProdutos()
         await buscarCategorias()
+    }
+
+    // Revalida o carrinho salvo contra os produtos atualizados vindos do backend:
+    // atualiza preço/desconto/estoque, ajusta quantidade se necessário e remove
+    // itens cujo produto foi excluído ou ficou sem estoque.
+    function sincronizarCarrinhoComProdutos(produtosAtualizados: Produto[]) {
+        setCart((prevCart) => {
+            const removidos: string[] = []
+
+            const novoCarrinho = prevCart
+                .map((item) => {
+                    const produtoAtual = produtosAtualizados.find((p) => p.id === item.id)
+
+                    if (!produtoAtual || produtoAtual.estoque <= 0) {
+                        removidos.push(item.nome)
+                        return null
+                    }
+
+                    const precoFinal = produtoAtual.precoComDesconto ?? produtoAtual.preco
+
+                    return {
+                        ...item,
+                        nome: produtoAtual.nome,
+                        code: produtoAtual.code,
+                        preco: precoFinal,
+                        precoOriginal: produtoAtual.preco,
+                        desconto: produtoAtual.desconto,
+                        estoque: produtoAtual.estoque,
+                        quantidade: Math.min(item.quantidade, produtoAtual.estoque),
+                    }
+                })
+                .filter((item): item is CartItem => item !== null)
+
+            if (removidos.length > 0) {
+                alert(`Alguns itens foram removidos do carrinho por falta de estoque: ${removidos.join(", ")}`)
+            }
+
+            return novoCarrinho
+        })
     }
 
     function filtrarProdutos() {
