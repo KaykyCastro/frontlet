@@ -35,7 +35,7 @@ export default function FinalizarDia() {
         setTotaisPorTipo(resultadoPorTipo);
     }, [vendas]);
 
-    function handleGoBack () {
+    function handleGoBack() {
         navigate("/Vendas")
     }
 
@@ -48,41 +48,43 @@ export default function FinalizarDia() {
 
     return (
         <div id="container-fin">
-        <div id="container-div">
-            <div id="container-metricas">
-                <section id="metricas-section">
-                    <section>
-                        <h1>Métricas do dia</h1>
-                    </section>
+            <div id="container-div">
+                <div id="container-metricas">
+                    <section id="metricas-section">
+                        <section>
+                            <h1>Métricas do dia</h1>
+                        </section>
 
-                    <section>
-                        <p style={{ marginBottom: "20px", fontWeight: "bold" }}>Valores por tipo de pagamento:</p>
-                        <section style={{ fontSize: "16px", gap: "10px" }}>
-                            <p>-Pix: {(totaisPorTipo?.PIX || 0).toFixed(2)} R$</p>
-                            <p>-Dinheiro: {(totaisPorTipo?.DINHEIRO || 0).toFixed(2)} R$</p>
-                            <p>-Débito: {(totaisPorTipo?.CARTAO_DEBITO || 0).toFixed(2)} R$</p>
-                            <p>-Crédito: {(totaisPorTipo?.CARTAO_CREDITO || 0).toFixed(2)} R$</p>
+                        <section>
+                            <p style={{ marginBottom: "20px", fontWeight: "bold" }}>Valores por tipo de pagamento:</p>
+                            <section style={{ fontSize: "16px", gap: "10px" }}>
+                                <p>-Pix: {(totaisPorTipo?.PIX || 0).toFixed(2)} R$</p>
+                                <p>-Dinheiro: {(totaisPorTipo?.DINHEIRO || 0).toFixed(2)} R$</p>
+                                <p>-Débito: {(totaisPorTipo?.CARTAO_DEBITO || 0).toFixed(2)} R$</p>
+                                <p>-Crédito: {(totaisPorTipo?.CARTAO_CREDITO || 0).toFixed(2)} R$</p>
+                            </section>
+                        </section>
+
+                        <section style={{ borderTop: "1px solid black", width: "90%" }}>
+                            <p style={{ fontSize: "20px", fontWeight: "bold", marginTop: "10px" }}>
+                                Total: {(total ?? 0).toFixed(2)} R$
+                            </p>
                         </section>
                     </section>
+                </div>
 
-                    <section style={{ borderTop: "1px solid black", width: "90%" }}>
-                        <p style={{ fontSize: "20px", fontWeight: "bold", marginTop: "10px" }}>Total: {total} R$</p>
+                <div id="container-list">
+                    <h1>Itens vendidos</h1>
+                    <section id="lista-itens">
+                        {vendas.map((venda) => (
+                            <ListarVendas
+                                venda={venda}
+                            />
+                        ))}
+
                     </section>
-                </section>
+                </div>
             </div>
-
-            <div id="container-list">
-                <h1>Itens vendidos</h1>
-                <section id="lista-itens">
-                    {vendas.map((venda) => (
-                        <ListarVendas
-                            venda={venda}
-                        />
-                    ))}
-
-                </section>
-            </div>
-        </div>
 
             <button id="btn-fin" onClick={handleGoBack}>Finalizar</button>
 
