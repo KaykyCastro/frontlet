@@ -6,6 +6,39 @@ import { TrashIcon, ArrowLeftIcon } from "@phosphor-icons/react"
 import "./sales.css"
 import { type Produto, type User, type CartItem, type Category } from "../../types"
 
+// Calcula o preço final de cada item do carrinho aplicando o desconto
+// (em valor fixo ou percentual) proporcionalmente ao subtotal do carrinho.
+// Usado tanto em finalizarVenda quanto em inserirDebito, pra evitar duplicação
+// e garantir que os dois fluxos sempre calculem o desconto do mesmo jeito.
+function calcularItensComDesconto(
+    cart: CartItem[],
+    desconto: { tipo: "valor" | "percentual"; valor: number }
+) {
+    const subtotalCarrinho = cart.reduce(
+        (acc, item) => acc + item.preco * item.quantidade,
+        0
+    )
+
+    return cart.map((item) => {
+        let precoFinal = Number(item.preco)
+
+        if (desconto.tipo === "valor" && desconto.valor > 0) {
+            const subtotalItem = precoFinal * item.quantidade
+            const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
+            // ✅ correção: dividir pela quantidade vendida (não pelo estoque)
+            precoFinal = precoFinal - descontoProporcional / item.quantidade
+        } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
+            precoFinal = precoFinal * (1 - desconto.valor / 100)
+        }
+
+        return {
+            id: item.id,
+            quantidade: item.quantidade,
+            preco: Number(precoFinal.toFixed(2)),
+        }
+    })
+}
+
 export default function Sales() {
 
     useEffect(() => {
@@ -78,28 +111,7 @@ export default function Sales() {
         try {
             if (cart.length === 0) return alert("Carrinho vazio!")
 
-            const subtotalCarrinho = cart.reduce(
-                (acc, item) => acc + item.preco * item.quantidade,
-                0
-            )
-
-            const itensComDesconto = cart.map((item) => {
-                let precoFinal = Number(item.preco)
-
-                if (desconto.tipo === "valor" && desconto.valor > 0) {
-                    const subtotalItem = precoFinal * item.quantidade
-                    const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
-                    precoFinal = precoFinal - descontoProporcional / item.estoque
-                } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
-                    precoFinal = precoFinal * (1 - desconto.valor / 100)
-                }
-
-                return {
-                    id: item.id,
-                    quantidade: item.quantidade,
-                    preco: Number(precoFinal.toFixed(2)),
-                }
-            })
+            const itensComDesconto = calcularItensComDesconto(cart, desconto)
 
             const body = {
                 itens: itensComDesconto,
@@ -158,28 +170,7 @@ export default function Sales() {
         if (!confirm(`Inserir débito de R$ ${calculaTotal().toFixed(2)} para ${usuarioSelecionado.nome}?`)) return
 
         try {
-            const subtotalCarrinho = cart.reduce(
-                (acc, item) => acc + item.preco * item.quantidade,
-                0
-            )
-
-            const itensComDesconto = cart.map((item) => {
-                let precoFinal = Number(item.preco)
-
-                if (desconto.tipo === "valor" && desconto.valor > 0) {
-                    const subtotalItem = precoFinal * item.quantidade
-                    const descontoProporcional = (subtotalItem / subtotalCarrinho) * desconto.valor
-                    precoFinal = precoFinal - descontoProporcional / item.estoque
-                } else if (desconto.tipo === "percentual" && desconto.valor > 0) {
-                    precoFinal = precoFinal * (1 - desconto.valor / 100)
-                }
-
-                return {
-                    id: item.id,
-                    quantidade: item.quantidade,
-                    preco: Number(precoFinal.toFixed(2)),
-                }
-            })
+            const itensComDesconto = calcularItensComDesconto(cart, desconto)
 
             const body = {
                 itens: itensComDesconto,
