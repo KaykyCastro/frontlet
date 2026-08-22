@@ -321,6 +321,8 @@ export default function Sales() {
             return alert("Produto sem estoque!")
         }
 
+        setSearchText("")
+
         const precoFinal = produtoAtual.precoComDesconto ?? produtoAtual.preco
 
         setCart((prev: CartItem[]) => {

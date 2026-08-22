@@ -65,6 +65,7 @@ export default function FiadoCliente() {
             return
         }
 
+        atualizarCliente(clienteRecebido.id)
         buscarPagamentos(clienteRecebido.id)
         buscarVendas(clienteRecebido.id)
     }, [])
